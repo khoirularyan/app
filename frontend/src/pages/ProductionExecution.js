@@ -6,7 +6,6 @@ import { productionOrders, productionLines } from "@/data/mockData";
 import { ArrowRight } from "lucide-react";
 import { ProcessIcon } from "@/components/visuals/ProcessIcons";
 import ProductIcon from "@/components/visuals/ProductIcon";
-import { ProductionLineIllustration } from "@/components/visuals/IndustrialVisuals";
 
 const stages = [
   { id: "casting",    label: "Casting",         color: "#0A6ED1" },
@@ -106,10 +105,6 @@ const ProductionExecution = () => {
                   <div className="text-sm font-semibold text-[#1C252E] font-display">{l.nama}</div>
                 </div>
                 <StatusBadge status={l.status} />
-              </div>
-              {/* Line illustration */}
-              <div className="bg-[#F8FAFC] border border-[#EEF0F2] rounded mb-3 px-2 py-1">
-                <ProductionLineIllustration status={l.status} utilisasi={(l.output / l.kapasitas) * 100} />
               </div>
               <div className="text-xs text-[#59687A] mb-2">{l.produk}</div>
               <div className="flex items-baseline gap-1 mb-1">
