@@ -14,6 +14,8 @@ import DeliveryOrders from "@/pages/DeliveryOrders";
 import Purchasing from "@/pages/Purchasing";
 import Maintenance from "@/pages/Maintenance";
 import Reports from "@/pages/Reports";
+import MasterProcess from "@/pages/MasterProcess";
+import BusinessFlow from "@/pages/BusinessFlow";
 import { Toaster } from "@/components/ui/sonner";
 
 function App() {
@@ -23,7 +25,9 @@ function App() {
         <Routes>
           <Route element={<AppLayout />}>
             <Route path="/" element={<Dashboard />} />
+            <Route path="/business-flow" element={<BusinessFlow />} />
             <Route path="/master-data" element={<MasterData />} />
+            <Route path="/master-process" element={<MasterProcess />} />
             <Route path="/planning" element={<ProductionPlanning />} />
             <Route path="/production-orders" element={<ProductionOrders />} />
             <Route path="/production-execution" element={<ProductionExecution />} />

@@ -11,8 +11,10 @@ import FilterPopover, { showExportToast } from "@/components/shared/FilterPopove
 import { toast } from "sonner";
 import ProductIcon, { getProductKey } from "@/components/visuals/ProductIcon";
 import {
-  products, productCategories, concreteGrades, materials, molds,
+  products, productCategories, productTypes, productSpecifications,
+  concreteGrades, materials, materialCategories, molds,
   customers, suppliers, warehouses, productionLines, machines, employees, shifts,
+  qcParameters, defectCategories, productionStatuses, deliveryStatuses,
   formatRupiah, formatNumber
 } from "@/data/mockData";
 
@@ -174,8 +176,11 @@ const MasterData = () => {
         <Tabs value={tab} onValueChange={setTab} data-testid="master-tabs">
           <TabsList className="bg-white border border-[#DFE3E8] p-1 h-auto flex flex-wrap gap-1">
             <TabsTrigger value="products" className="text-xs h-8">Produk</TabsTrigger>
-            <TabsTrigger value="categories" className="text-xs h-8">Kategori</TabsTrigger>
+            <TabsTrigger value="categories" className="text-xs h-8">Kategori Produk</TabsTrigger>
+            <TabsTrigger value="types" className="text-xs h-8">Tipe Produk</TabsTrigger>
+            <TabsTrigger value="specs" className="text-xs h-8">Spesifikasi</TabsTrigger>
             <TabsTrigger value="grades" className="text-xs h-8">Mutu Beton</TabsTrigger>
+            <TabsTrigger value="material-cat" className="text-xs h-8">Kategori Material</TabsTrigger>
             <TabsTrigger value="materials" className="text-xs h-8">Material</TabsTrigger>
             <TabsTrigger value="molds" className="text-xs h-8">Cetakan</TabsTrigger>
             <TabsTrigger value="customers" className="text-xs h-8">Customer</TabsTrigger>
@@ -185,6 +190,10 @@ const MasterData = () => {
             <TabsTrigger value="machines" className="text-xs h-8">Mesin</TabsTrigger>
             <TabsTrigger value="employees" className="text-xs h-8">Karyawan</TabsTrigger>
             <TabsTrigger value="shifts" className="text-xs h-8">Shift</TabsTrigger>
+            <TabsTrigger value="qc-params" className="text-xs h-8">Parameter QC</TabsTrigger>
+            <TabsTrigger value="defects" className="text-xs h-8">Kategori Defect</TabsTrigger>
+            <TabsTrigger value="prod-status" className="text-xs h-8">Status Produksi</TabsTrigger>
+            <TabsTrigger value="del-status" className="text-xs h-8">Status Pengiriman</TabsTrigger>
           </TabsList>
 
           <TabsContent value="products" className="mt-4">
@@ -502,6 +511,144 @@ const MasterData = () => {
               { key: "supervisor", label: "Supervisor" },
               { key: "jumlahPekerja", label: "Jumlah Pekerja", cls: "text-right font-mono-num" },
             ]} />
+          </TabsContent>
+
+          <TabsContent value="types" className="mt-4">
+            <Section testId="types-table" entityName="Tipe Produk" data={productTypes}
+              addFields={[
+                { name: "kode", label: "Kode Tipe", required: true },
+                { name: "kategori", label: "Kategori", type: "select", options: productCategories.map(c => ({ value: c.nama, label: c.nama })) },
+                { name: "nama", label: "Nama Tipe", required: true, span: 2 },
+                { name: "kodePrefix", label: "Prefix Kode" },
+                { name: "standar", label: "Standar Acuan" },
+              ]}
+              columns={[
+                { key: "kode", label: "Kode", cls: "font-mono-num text-[#0A6ED1] font-medium" },
+                { key: "kategori", label: "Kategori" },
+                { key: "nama", label: "Tipe", cls: "font-medium" },
+                { key: "kodePrefix", label: "Prefix", cls: "font-mono-num" },
+                { key: "standar", label: "Standar", cls: "text-[#59687A]" },
+                { key: "aktif", label: "Status", render: (r) => <StatusBadge status={r.aktif ? "Aktif" : "Nonaktif"} /> },
+              ]} />
+          </TabsContent>
+
+          <TabsContent value="specs" className="mt-4">
+            <Section testId="specs-table" entityName="Spesifikasi Produk" data={productSpecifications}
+              addFields={[
+                { name: "kode", label: "Kode Spec", required: true },
+                { name: "produk", label: "Produk", required: true, span: 2 },
+                { name: "dimensi", label: "Dimensi" },
+                { name: "toleransi", label: "Toleransi" },
+                { name: "berat", label: "Berat" },
+                { name: "grade", label: "Mutu Beton", type: "select", options: concreteGrades.map(g => ({ value: g.grade, label: g.grade })) },
+              ]}
+              columns={[
+                { key: "kode", label: "Kode", cls: "font-mono-num text-[#0A6ED1] font-medium" },
+                { key: "produk", label: "Produk", cls: "font-medium" },
+                { key: "dimensi", label: "Dimensi", cls: "font-mono-num" },
+                { key: "toleransi", label: "Toleransi", cls: "text-[#59687A]" },
+                { key: "berat", label: "Berat" },
+                { key: "grade", label: "Mutu", render: (r) => <StatusBadge status={r.grade} variant="info" /> },
+                { key: "aktif", label: "Status", render: (r) => <StatusBadge status={r.aktif ? "Aktif" : "Nonaktif"} /> },
+              ]} />
+          </TabsContent>
+
+          <TabsContent value="material-cat" className="mt-4">
+            <Section testId="material-cat-table" entityName="Kategori Material" data={materialCategories}
+              addFields={[
+                { name: "kode", label: "Kode Kategori", required: true },
+                { name: "nama", label: "Nama Kategori", required: true, span: 2 },
+                { name: "deskripsi", label: "Deskripsi", type: "textarea", span: 2 },
+                { name: "contoh", label: "Contoh Material", span: 2 },
+              ]}
+              columns={[
+                { key: "kode", label: "Kode", cls: "font-mono-num text-[#0A6ED1] font-medium" },
+                { key: "nama", label: "Kategori", cls: "font-medium" },
+                { key: "deskripsi", label: "Deskripsi", cls: "text-[#59687A]" },
+                { key: "contoh", label: "Contoh" },
+                { key: "aktif", label: "Status", render: (r) => <StatusBadge status={r.aktif ? "Aktif" : "Nonaktif"} /> },
+              ]} />
+          </TabsContent>
+
+          <TabsContent value="qc-params" className="mt-4">
+            <Section testId="qc-params-table" entityName="Parameter QC" data={qcParameters}
+              addFields={[
+                { name: "kode", label: "Kode Parameter", required: true },
+                { name: "parameter", label: "Nama Parameter", required: true, span: 2 },
+                { name: "satuan", label: "Satuan" },
+                { name: "min", label: "Batas Minimum" },
+                { name: "target", label: "Target" },
+                { name: "metode", label: "Metode Uji", span: 2 },
+              ]}
+              columns={[
+                { key: "kode", label: "Kode", cls: "font-mono-num text-[#0A6ED1] font-medium" },
+                { key: "parameter", label: "Parameter", cls: "font-medium" },
+                { key: "satuan", label: "Satuan", cls: "text-[#59687A]" },
+                { key: "min", label: "Minimum" },
+                { key: "target", label: "Target", cls: "font-medium text-[#107E3E]" },
+                { key: "metode", label: "Metode" },
+                { key: "aktif", label: "Status", render: (r) => <StatusBadge status={r.aktif ? "Aktif" : "Nonaktif"} /> },
+              ]} />
+          </TabsContent>
+
+          <TabsContent value="defects" className="mt-4">
+            <Section testId="defects-table" entityName="Kategori Defect" data={defectCategories}
+              addFields={[
+                { name: "kode", label: "Kode Defect", required: true },
+                { name: "nama", label: "Nama Defect", required: true, span: 2 },
+                { name: "tingkat", label: "Tingkat", type: "select", options: [
+                  { value: "Kritis", label: "Kritis" }, { value: "Mayor", label: "Mayor" }, { value: "Minor", label: "Minor" },
+                ]},
+                { name: "penyebabUmum", label: "Penyebab Umum", span: 2 },
+                { name: "disposisi", label: "Disposisi Standar", span: 2 },
+              ]}
+              columns={[
+                { key: "kode", label: "Kode", cls: "font-mono-num text-[#0A6ED1] font-medium" },
+                { key: "warna", label: "", render: (r) => <span className="inline-block w-3 h-3 rounded" style={{ backgroundColor: r.warna }} /> },
+                { key: "nama", label: "Defect", cls: "font-medium" },
+                { key: "tingkat", label: "Tingkat", render: (r) => <StatusBadge status={r.tingkat} /> },
+                { key: "penyebabUmum", label: "Penyebab Umum", cls: "text-[#59687A]" },
+                { key: "disposisi", label: "Disposisi" },
+                { key: "aktif", label: "Status", render: (r) => <StatusBadge status={r.aktif ? "Aktif" : "Nonaktif"} /> },
+              ]} />
+          </TabsContent>
+
+          <TabsContent value="prod-status" className="mt-4">
+            <Section testId="prod-status-table" entityName="Status Produksi" data={productionStatuses}
+              addFields={[
+                { name: "kode", label: "Kode Status", required: true },
+                { name: "status", label: "Nama Status", required: true, span: 2 },
+                { name: "urutan", label: "Urutan", type: "number" },
+                { name: "warna", label: "Warna (hex)" },
+                { name: "deskripsi", label: "Deskripsi", type: "textarea", span: 2 },
+              ]}
+              columns={[
+                { key: "urutan", label: "#", cls: "font-mono-num text-[#59687A] w-12" },
+                { key: "kode", label: "Kode", cls: "font-mono-num text-[#0A6ED1] font-medium" },
+                { key: "warna", label: "", render: (r) => <span className="inline-block w-3 h-3 rounded-full" style={{ backgroundColor: r.warna }} /> },
+                { key: "status", label: "Status", cls: "font-medium" },
+                { key: "deskripsi", label: "Deskripsi", cls: "text-[#59687A]" },
+                { key: "aktif", label: "Aktif", render: (r) => <StatusBadge status={r.aktif ? "Aktif" : "Nonaktif"} /> },
+              ]} />
+          </TabsContent>
+
+          <TabsContent value="del-status" className="mt-4">
+            <Section testId="del-status-table" entityName="Status Pengiriman" data={deliveryStatuses}
+              addFields={[
+                { name: "kode", label: "Kode Status", required: true },
+                { name: "status", label: "Nama Status", required: true, span: 2 },
+                { name: "urutan", label: "Urutan", type: "number" },
+                { name: "warna", label: "Warna (hex)" },
+                { name: "deskripsi", label: "Deskripsi", type: "textarea", span: 2 },
+              ]}
+              columns={[
+                { key: "urutan", label: "#", cls: "font-mono-num text-[#59687A] w-12" },
+                { key: "kode", label: "Kode", cls: "font-mono-num text-[#0A6ED1] font-medium" },
+                { key: "warna", label: "", render: (r) => <span className="inline-block w-3 h-3 rounded-full" style={{ backgroundColor: r.warna }} /> },
+                { key: "status", label: "Status", cls: "font-medium" },
+                { key: "deskripsi", label: "Deskripsi", cls: "text-[#59687A]" },
+                { key: "aktif", label: "Aktif", render: (r) => <StatusBadge status={r.aktif ? "Aktif" : "Nonaktif"} /> },
+              ]} />
           </TabsContent>
         </Tabs>
       </div>

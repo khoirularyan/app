@@ -3,13 +3,13 @@ import { navigationItems } from "@/data/mockData";
 import {
   LayoutDashboard, Database, CalendarRange, ClipboardList, Factory,
   Thermometer, ShieldCheck, Package, ShoppingCart, Truck, ShoppingBag,
-  Wrench, FileBarChart, ChevronLeft, ChevronRight
+  Wrench, FileBarChart, ChevronLeft, ChevronRight, Workflow, GitBranch
 } from "lucide-react";
 
 const iconMap = {
   LayoutDashboard, Database, CalendarRange, ClipboardList, Factory,
   Thermometer, ShieldCheck, Package, ShoppingCart, Truck, ShoppingBag,
-  Wrench, FileBarChart
+  Wrench, FileBarChart, Workflow, GitBranch
 };
 
 export const Sidebar = ({ collapsed, onToggle }) => {

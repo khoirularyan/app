@@ -1,10 +1,12 @@
 import PageHeader from "@/components/shared/PageHeader";
 import KPICard from "@/components/shared/KPICard";
+import KPIDrilldownDialog from "@/components/shared/KPIDrilldownDialog";
 import StatusBadge from "@/components/shared/StatusBadge";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import {
-  todayKPIs, productionTrend, monthlyProduction, topProducts, recentActivities, formatNumber
+  todayKPIs, productionTrend, monthlyProduction, topProducts, recentActivities, formatNumber, kpiDefinitions
 } from "@/data/mockData";
 import {
   Target, TrendingUp, Thermometer, ShieldCheck, AlertTriangle, Package,
@@ -28,6 +30,12 @@ const activityIconMap = {
 };
 
 const Dashboard = () => {
+  const [drilldown, setDrilldown] = useState(null);
+  const openKPI = (id, accent, value, delta) => setDrilldown({ id, accent, value, delta });
+  const def = drilldown ? kpiDefinitions[drilldown.id] : null;
+  const accentHex = {
+    default: "#0A6ED1", success: "#107E3E", warning: "#E9730C", error: "#B00020", neutral: "#59687A",
+  };
   return (
     <div>
       <PageHeader
@@ -53,20 +61,29 @@ const Dashboard = () => {
 
         {/* KPI Grid */}
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
-          <KPICard testId="kpi-target" label="Target Produksi" value={todayKPIs.targetProduksi} unit="unit" icon={Target} accent="neutral" />
-          <KPICard testId="kpi-realisasi" label="Realisasi Hari Ini" value={todayKPIs.realisasiProduksi} unit="unit" icon={TrendingUp} accent="default" trend="down" trendValue="-3.5%" />
-          <KPICard testId="kpi-achievement" label="Pencapaian" value={`${todayKPIs.achievement.toFixed(1)}%`} icon={Activity} accent={todayKPIs.achievement >= 90 ? "success" : "warning"} trend="down" trendValue="-2.1%" />
-          <KPICard testId="kpi-curing" label="Dalam Curing" value={todayKPIs.dalamCuring} unit="unit" icon={Thermometer} accent="warning" trend="up" trendValue="+12" />
-          <KPICard testId="kpi-qc" label="Siap QC" value={todayKPIs.siapQC} unit="unit" icon={ShieldCheck} accent="default" trend="up" trendValue="+8" />
-          <KPICard testId="kpi-reject" label="Reject Rate" value={`${todayKPIs.rejectRate}%`} icon={AlertTriangle} accent="error" trend="up" trendValue="+0.4%" />
+          <KPICard testId="kpi-target" label="Target Produksi" value={todayKPIs.targetProduksi} unit="unit" icon={Target} accent="neutral" info={kpiDefinitions["kpi-target"].deskripsi} onClick={() => openKPI("kpi-target", "neutral", `${todayKPIs.targetProduksi} unit`)} />
+          <KPICard testId="kpi-realisasi" label="Realisasi Hari Ini" value={todayKPIs.realisasiProduksi} unit="unit" icon={TrendingUp} accent="default" trend="down" trendValue="-3.5%" info={kpiDefinitions["kpi-realisasi"].deskripsi} onClick={() => openKPI("kpi-realisasi", "default", `${todayKPIs.realisasiProduksi} unit`, "-3.5% vs kemarin")} />
+          <KPICard testId="kpi-achievement" label="Pencapaian" value={`${todayKPIs.achievement.toFixed(1)}%`} icon={Activity} accent={todayKPIs.achievement >= 90 ? "success" : "warning"} trend="down" trendValue="-2.1%" info={kpiDefinitions["kpi-achievement"].deskripsi} onClick={() => openKPI("kpi-achievement", todayKPIs.achievement >= 90 ? "success" : "warning", `${todayKPIs.achievement.toFixed(1)}%`, "-2.1% vs kemarin")} />
+          <KPICard testId="kpi-curing" label="Dalam Curing" value={todayKPIs.dalamCuring} unit="unit" icon={Thermometer} accent="warning" trend="up" trendValue="+12" info={kpiDefinitions["kpi-curing"].deskripsi} onClick={() => openKPI("kpi-curing", "warning", `${todayKPIs.dalamCuring} unit`, "+12 vs kemarin")} />
+          <KPICard testId="kpi-qc" label="Siap QC" value={todayKPIs.siapQC} unit="unit" icon={ShieldCheck} accent="default" trend="up" trendValue="+8" info={kpiDefinitions["kpi-qc"].deskripsi} onClick={() => openKPI("kpi-qc", "default", `${todayKPIs.siapQC} unit`, "+8 vs kemarin")} />
+          <KPICard testId="kpi-reject" label="Reject Rate" value={`${todayKPIs.rejectRate}%`} icon={AlertTriangle} accent="error" trend="up" trendValue="+0.4%" info={kpiDefinitions["kpi-reject"].deskripsi} onClick={() => openKPI("kpi-reject", "error", `${todayKPIs.rejectRate}%`, "+0.4% vs kemarin")} />
 
-          <KPICard testId="kpi-stok" label="Stok Produk Jadi" value={formatNumber(todayKPIs.stokProdukJadi)} unit="unit" icon={Package} accent="success" trend="up" trendValue="+124" />
-          <KPICard testId="kpi-material" label="Pemakaian Material" value={todayKPIs.pemakaianMaterial} unit="ton" icon={Boxes} accent="default" trend="up" trendValue="+5.2%" />
-          <KPICard testId="kpi-mold" label="Utilisasi Cetakan" value={`${todayKPIs.utilisasiCetakan}%`} icon={Hammer} accent={todayKPIs.utilisasiCetakan >= 80 ? "success" : "warning"} trend="up" trendValue="+3%" />
-          <KPICard testId="kpi-wip" label="Work In Progress" value={todayKPIs.worKInProgress} unit="unit" icon={Activity} accent="neutral" trend="up" trendValue="+18" />
-          <KPICard testId="kpi-efisiensi" label="Efisiensi Produksi" value={`${todayKPIs.efisiensiProduksi}%`} icon={TrendingUp} accent="success" trend="up" trendValue="+1.2%" />
-          <KPICard testId="kpi-jadi-hari" label="Produk Jadi Hari Ini" value={todayKPIs.realisasiProduksi - todayKPIs.reject} unit="unit" icon={ShieldCheck} accent="success" trend="down" trendValue="-2%" />
+          <KPICard testId="kpi-stok" label="Stok Produk Jadi" value={formatNumber(todayKPIs.stokProdukJadi)} unit="unit" icon={Package} accent="success" trend="up" trendValue="+124" info={kpiDefinitions["kpi-stok"].deskripsi} onClick={() => openKPI("kpi-stok", "success", `${formatNumber(todayKPIs.stokProdukJadi)} unit`, "+124 vs kemarin")} />
+          <KPICard testId="kpi-material" label="Pemakaian Material" value={todayKPIs.pemakaianMaterial} unit="ton" icon={Boxes} accent="default" trend="up" trendValue="+5.2%" info={kpiDefinitions["kpi-material"].deskripsi} onClick={() => openKPI("kpi-material", "default", `${todayKPIs.pemakaianMaterial} ton`, "+5.2% vs kemarin")} />
+          <KPICard testId="kpi-mold" label="Utilisasi Cetakan" value={`${todayKPIs.utilisasiCetakan}%`} icon={Hammer} accent={todayKPIs.utilisasiCetakan >= 80 ? "success" : "warning"} trend="up" trendValue="+3%" info={kpiDefinitions["kpi-mold"].deskripsi} onClick={() => openKPI("kpi-mold", todayKPIs.utilisasiCetakan >= 80 ? "success" : "warning", `${todayKPIs.utilisasiCetakan}%`, "+3% vs kemarin")} />
+          <KPICard testId="kpi-wip" label="Work In Progress" value={todayKPIs.worKInProgress} unit="unit" icon={Activity} accent="neutral" trend="up" trendValue="+18" info={kpiDefinitions["kpi-wip"].deskripsi} onClick={() => openKPI("kpi-wip", "neutral", `${todayKPIs.worKInProgress} unit`, "+18 vs kemarin")} />
+          <KPICard testId="kpi-efisiensi" label="Efisiensi Produksi" value={`${todayKPIs.efisiensiProduksi}%`} icon={TrendingUp} accent="success" trend="up" trendValue="+1.2%" info={kpiDefinitions["kpi-efisiensi"].deskripsi} onClick={() => openKPI("kpi-efisiensi", "success", `${todayKPIs.efisiensiProduksi}%`, "+1.2% vs kemarin")} />
+          <KPICard testId="kpi-jadi-hari" label="Produk Jadi Hari Ini" value={todayKPIs.realisasiProduksi - todayKPIs.reject} unit="unit" icon={ShieldCheck} accent="success" trend="down" trendValue="-2%" info={kpiDefinitions["kpi-jadi-hari"].deskripsi} onClick={() => openKPI("kpi-jadi-hari", "success", `${todayKPIs.realisasiProduksi - todayKPIs.reject} unit`, "-2% vs kemarin")} />
         </div>
+
+        <KPIDrilldownDialog
+          open={Boolean(drilldown)}
+          onOpenChange={(o) => { if (!o) setDrilldown(null); }}
+          definition={def}
+          currentValue={drilldown?.value}
+          currentDelta={drilldown?.delta}
+          accent={drilldown ? accentHex[drilldown.accent] : "#0A6ED1"}
+        />
 
         {/* Charts row */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">

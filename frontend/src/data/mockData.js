@@ -361,7 +361,9 @@ export const efficiencyByLine = [
 
 export const navigationItems = [
   { id: "dashboard", label: "Dashboard", icon: "LayoutDashboard", path: "/" },
+  { id: "business-flow", label: "Alur Bisnis", icon: "Workflow", path: "/business-flow" },
   { id: "master-data", label: "Master Data", icon: "Database", path: "/master-data" },
+  { id: "master-process", label: "Master Proses", icon: "GitBranch", path: "/master-process" },
   { id: "planning", label: "Perencanaan Produksi", icon: "CalendarRange", path: "/planning" },
   { id: "production-orders", label: "Order Produksi", icon: "ClipboardList", path: "/production-orders" },
   { id: "production-execution", label: "Eksekusi Produksi", icon: "Factory", path: "/production-execution" },
@@ -374,6 +376,237 @@ export const navigationItems = [
   { id: "maintenance", label: "Pemeliharaan", icon: "Wrench", path: "/maintenance" },
   { id: "reports", label: "Laporan", icon: "FileBarChart", path: "/reports" },
 ];
+
+// ===== CONFIGURABLE MASTER DATA (extended) =====
+
+export const productTypes = [
+  { kode: "TYP-001", kategori: "Pipa", nama: "Reinforced Concrete Pipe", kodePrefix: "RCP", standar: "SNI 6369:2008", aktif: true },
+  { kode: "TYP-002", kategori: "Pipa", nama: "Non-Reinforced Concrete Pipe", kodePrefix: "NRP", standar: "SNI 03-2853-1992", aktif: true },
+  { kode: "TYP-003", kategori: "U-Ditch", nama: "U-Ditch Standard", kodePrefix: "UDT", standar: "SNI 7833:2012", aktif: true },
+  { kode: "TYP-004", kategori: "U-Ditch", nama: "U-Ditch Heavy Duty", kodePrefix: "UDTH", standar: "SNI 7833:2012", aktif: true },
+  { kode: "TYP-005", kategori: "Cover", nama: "Cover U-Ditch", kodePrefix: "CVR", standar: "SNI 7833:2012", aktif: true },
+  { kode: "TYP-006", kategori: "Box Culvert", nama: "Box Culvert Single", kodePrefix: "BCS", standar: "SNI 4810:2013", aktif: true },
+  { kode: "TYP-007", kategori: "Box Culvert", nama: "Box Culvert Double", kodePrefix: "BCD", standar: "SNI 4810:2013", aktif: true },
+  { kode: "TYP-008", kategori: "Barrier", nama: "New Jersey Barrier", kodePrefix: "NJ", standar: "AASHTO LRFD", aktif: true },
+  { kode: "TYP-009", kategori: "Sumur Resapan", nama: "Sumur Resapan Modular", kodePrefix: "SR", standar: "SNI 03-2453-2002", aktif: true },
+  { kode: "TYP-010", kategori: "Jacking", nama: "Micro-Tunneling Pipe", kodePrefix: "JCK", standar: "ASTM C76", aktif: true },
+];
+
+export const productSpecifications = [
+  { kode: "SPEC-001", produk: "U-Ditch 300", dimensi: "300×300×1200 mm", toleransi: "± 5 mm", berat: "185 kg", grade: "K-350", aktif: true },
+  { kode: "SPEC-002", produk: "U-Ditch 500", dimensi: "500×500×1200 mm", toleransi: "± 5 mm", berat: "385 kg", grade: "K-350", aktif: true },
+  { kode: "SPEC-003", produk: "U-Ditch 800", dimensi: "800×800×1200 mm", toleransi: "± 8 mm", berat: "720 kg", grade: "K-400", aktif: true },
+  { kode: "SPEC-004", produk: "Box Culvert 800", dimensi: "800×800×1000 mm", toleransi: "± 8 mm", berat: "945 kg", grade: "K-400", aktif: true },
+  { kode: "SPEC-005", produk: "Box Culvert 1500", dimensi: "1500×1500×1000 mm", toleransi: "± 10 mm", berat: "2480 kg", grade: "K-450", aktif: true },
+  { kode: "SPEC-006", produk: "Pipa RC Ø600", dimensi: "Ø600 × 2000 mm", toleransi: "± 6 mm", berat: "425 kg", grade: "K-350", aktif: true },
+  { kode: "SPEC-007", produk: "Pipa RC Ø1000", dimensi: "Ø1000 × 2000 mm", toleransi: "± 10 mm", berat: "1240 kg", grade: "K-400", aktif: true },
+  { kode: "SPEC-008", produk: "Barrier NJ", dimensi: "810×600×3000 mm", toleransi: "± 5 mm", berat: "1320 kg", grade: "K-350", aktif: true },
+];
+
+export const materialCategories = [
+  { kode: "MTC-001", nama: "Binder", deskripsi: "Material pengikat utama beton", contoh: "Semen Portland, Semen PCC", aktif: true },
+  { kode: "MTC-002", nama: "Agregat Halus", deskripsi: "Pasir untuk campuran beton", contoh: "Pasir Lumajang, Pasir Cor", aktif: true },
+  { kode: "MTC-003", nama: "Agregat Kasar", deskripsi: "Batu pecah / split", contoh: "Batu Split 1-2, Split 2-3", aktif: true },
+  { kode: "MTC-004", nama: "Tulangan", deskripsi: "Baja tulangan beton", contoh: "Besi D10, D13, Wire Mesh", aktif: true },
+  { kode: "MTC-005", nama: "Admixture", deskripsi: "Bahan tambahan kimia", contoh: "Superplasticizer, Retarder", aktif: true },
+  { kode: "MTC-006", nama: "Air", deskripsi: "Air pencampur beton", contoh: "Air Bersih Standar", aktif: true },
+  { kode: "MTC-007", nama: "Curing Compound", deskripsi: "Bahan perawatan beton", contoh: "Membrane Curing Liquid", aktif: true },
+];
+
+export const qcParameters = [
+  { kode: "QCP-001", parameter: "Kuat Tekan 7 Hari", satuan: "MPa", min: "70% f'c", target: "Sesuai SNI", metode: "Compressive Test", aktif: true },
+  { kode: "QCP-002", parameter: "Kuat Tekan 28 Hari", satuan: "MPa", min: "100% f'c", target: "≥ f'c rencana", metode: "Compressive Test", aktif: true },
+  { kode: "QCP-003", parameter: "Slump Test", satuan: "cm", min: "8 cm", target: "10 ± 2 cm", metode: "Slump Cone", aktif: true },
+  { kode: "QCP-004", parameter: "Dimensi Panjang", satuan: "mm", min: "Toleransi ±5", target: "Sesuai gambar", metode: "Meteran Kalibrasi", aktif: true },
+  { kode: "QCP-005", parameter: "Dimensi Lebar/Diameter", satuan: "mm", min: "Toleransi ±5", target: "Sesuai gambar", metode: "Caliper", aktif: true },
+  { kode: "QCP-006", parameter: "Tebal Selimut Beton", satuan: "mm", min: "20 mm", target: "≥ 25 mm", metode: "Cover Meter", aktif: true },
+  { kode: "QCP-007", parameter: "Visual Permukaan", satuan: "kelas", min: "Kelas B", target: "Kelas A", metode: "Visual Inspection", aktif: true },
+  { kode: "QCP-008", parameter: "Berat per Unit", satuan: "kg", min: "Toleransi -3%", target: "± 2%", metode: "Timbangan Industri", aktif: true },
+];
+
+export const defectCategories = [
+  { kode: "DEF-001", nama: "Retak Struktural", tingkat: "Kritis", penyebabUmum: "Curing tidak optimal", disposisi: "Hancurkan", warna: "#B00020", aktif: true },
+  { kode: "DEF-002", nama: "Dimensi Tidak Sesuai", tingkat: "Mayor", penyebabUmum: "Cetakan aus / pemasangan salah", disposisi: "Rework / Reject", warna: "#E9730C", aktif: true },
+  { kode: "DEF-003", nama: "Honeycomb", tingkat: "Mayor", penyebabUmum: "Pemadatan kurang", disposisi: "Repair / Hancurkan", warna: "#E9730C", aktif: true },
+  { kode: "DEF-004", nama: "Cacat Permukaan", tingkat: "Minor", penyebabUmum: "Demoulding terlalu cepat", disposisi: "Repair / Downgrade", warna: "#FBC36C", aktif: true },
+  { kode: "DEF-005", nama: "Tulangan Terekspos", tingkat: "Mayor", penyebabUmum: "Selimut beton tipis", disposisi: "Repair / Reject", warna: "#E9730C", aktif: true },
+  { kode: "DEF-006", nama: "Warna Tidak Merata", tingkat: "Minor", penyebabUmum: "Mix design tidak konsisten", disposisi: "Downgrade", warna: "#FBC36C", aktif: true },
+  { kode: "DEF-007", nama: "Lubang Udara", tingkat: "Minor", penyebabUmum: "Getaran kurang", disposisi: "Repair", warna: "#FBC36C", aktif: true },
+];
+
+export const productionStatuses = [
+  { kode: "PRS-01", status: "Direncanakan", urutan: 1, warna: "#59687A", deskripsi: "PO sudah dibuat, menunggu mulai produksi", aktif: true },
+  { kode: "PRS-02", status: "Casting", urutan: 2, warna: "#0A6ED1", deskripsi: "Sedang dalam proses pengecoran", aktif: true },
+  { kode: "PRS-03", status: "Curing", urutan: 3, warna: "#E9730C", deskripsi: "Sedang dalam proses perawatan beton", aktif: true },
+  { kode: "PRS-04", status: "Demoulding", urutan: 4, warna: "#0070F2", deskripsi: "Pembukaan cetakan setelah curing selesai", aktif: true },
+  { kode: "PRS-05", status: "QC", urutan: 5, warna: "#107E3E", deskripsi: "Pemeriksaan mutu sebelum gudang", aktif: true },
+  { kode: "PRS-06", status: "Selesai", urutan: 6, warna: "#107E3E", deskripsi: "Produk siap di gudang produk jadi", aktif: true },
+  { kode: "PRS-07", status: "Ditahan", urutan: 7, warna: "#B00020", deskripsi: "Produksi dihentikan sementara", aktif: false },
+];
+
+export const deliveryStatuses = [
+  { kode: "DLS-01", status: "Dipersiapkan", urutan: 1, warna: "#59687A", deskripsi: "DO dibuat, item sedang disiapkan", aktif: true },
+  { kode: "DLS-02", status: "Siap Berangkat", urutan: 2, warna: "#0A6ED1", deskripsi: "Truk sudah dimuat, menunggu keberangkatan", aktif: true },
+  { kode: "DLS-03", status: "Dalam Perjalanan", urutan: 3, warna: "#E9730C", deskripsi: "Truk dalam perjalanan ke lokasi customer", aktif: true },
+  { kode: "DLS-04", status: "Diterima", urutan: 4, warna: "#107E3E", deskripsi: "Customer telah menerima barang", aktif: true },
+  { kode: "DLS-05", status: "Selesai", urutan: 5, warna: "#107E3E", deskripsi: "PO ditutup dan invoice diterbitkan", aktif: true },
+  { kode: "DLS-06", status: "Tertunda", urutan: 6, warna: "#B00020", deskripsi: "Pengiriman ditunda karena alasan tertentu", aktif: false },
+];
+
+export const processDefinitions = [
+  { id: "P01", urutan: 1, nama: "Persiapan Tulangan", icon: "Wrench", warna: "#59687A", deskripsi: "Pemotongan, pembengkokan dan perakitan besi tulangan", durasi: 45, aktif: true },
+  { id: "P02", urutan: 2, nama: "Persiapan Cetakan", icon: "Boxes", warna: "#0070F2", deskripsi: "Pembersihan, pengolesan release agent dan setting tulangan", durasi: 30, aktif: true },
+  { id: "P03", urutan: 3, nama: "Casting", icon: "Droplet", warna: "#0A6ED1", deskripsi: "Pengecoran beton segar ke dalam cetakan dengan vibrasi", durasi: 60, aktif: true },
+  { id: "P04", urutan: 4, nama: "Steam Curing", icon: "Thermometer", warna: "#E9730C", deskripsi: "Perawatan beton dengan uap pada 65-70°C selama 8-12 jam", durasi: 480, aktif: true },
+  { id: "P05", urutan: 5, nama: "Demoulding", icon: "Unlock", warna: "#0070F2", deskripsi: "Pembukaan cetakan setelah beton mencapai kekuatan awal", durasi: 20, aktif: true },
+  { id: "P06", urutan: 6, nama: "Inspeksi Awal", icon: "Search", warna: "#107E3E", deskripsi: "Pengecekan visual dan dimensi setelah demoulding", durasi: 15, aktif: true },
+  { id: "P07", urutan: 7, nama: "Repair / Touch-up", icon: "Hammer", warna: "#E9730C", deskripsi: "Perbaikan cacat ringan permukaan sebelum QC final", durasi: 30, aktif: false },
+  { id: "P08", urutan: 8, nama: "QC Final", icon: "ShieldCheck", warna: "#107E3E", deskripsi: "Inspeksi mutu lengkap termasuk uji kuat tekan", durasi: 25, aktif: true },
+  { id: "P09", urutan: 9, nama: "Marking & Labeling", icon: "Tag", warna: "#59687A", deskripsi: "Pemberian kode batch, tanggal produksi dan QR code", durasi: 10, aktif: true },
+  { id: "P10", urutan: 10, nama: "Finished Goods", icon: "Package", warna: "#107E3E", deskripsi: "Pemindahan ke gudang produk jadi", durasi: 15, aktif: true },
+];
+
+export const businessFlow = [
+  { id: "F1", nama: "Order Penjualan", icon: "ShoppingCart", warna: "#0A6ED1", deskripsi: "Sales menerima order dari customer, mencatat spesifikasi, qty, harga, dan tanggal kirim", input: "Permintaan customer", output: "Sales Order (SO)" },
+  { id: "F2", nama: "Order Produksi", icon: "ClipboardList", warna: "#0070F2", deskripsi: "PPIC membuat Production Order dari SO, menentukan line, jadwal, dan kebutuhan material", input: "Sales Order", output: "Production Order (PO)" },
+  { id: "F3", nama: "Proses Produksi", icon: "Factory", warna: "#E9730C", deskripsi: "Eksekusi 10 tahap proses: persiapan tulangan → casting → curing → demoulding → repair", input: "Production Order", output: "Work-In-Progress" },
+  { id: "F4", nama: "Quality Control", icon: "ShieldCheck", warna: "#107E3E", deskripsi: "Inspeksi 8 parameter mutu (kuat tekan, dimensi, visual, selimut beton, dll)", input: "WIP siap inspeksi", output: "Status Lulus / Reject" },
+  { id: "F5", nama: "Produk Jadi", icon: "Package", warna: "#107E3E", deskripsi: "Produk lulus QC masuk ke gudang Finished Goods, tersedia untuk pengiriman", input: "Hasil QC Lulus", output: "Stok Tersedia" },
+  { id: "F6", nama: "Pengiriman", icon: "Truck", warna: "#0A6ED1", deskripsi: "Dispatch berdasarkan SO, alokasi truk, driver, dan rute, hingga diterima customer", input: "Sales Order + Stok", output: "Delivery Order Selesai" },
+];
+
+export const kpiDefinitions = {
+  "kpi-target": {
+    label: "Target Produksi", formula: "Target = Σ Quantity dari PO Aktif (status Direncanakan + Berjalan) untuk hari ini",
+    dataSource: "Production Orders · Master Lines",
+    deskripsi: "Jumlah unit yang direncanakan untuk diproduksi hari ini.",
+    breakdown: [
+      { label: "LINE-A · Pipa Beton", value: 48, unit: "unit", color: "#0A6ED1" },
+      { label: "LINE-B · U-Ditch", value: 60, unit: "unit", color: "#0070F2" },
+      { label: "LINE-C · Box Culvert", value: 24, unit: "unit", color: "#E9730C" },
+      { label: "LINE-D · Barrier", value: 18, unit: "unit", color: "#59687A" },
+    ],
+  },
+  "kpi-realisasi": {
+    label: "Realisasi Hari Ini", formula: "Realisasi = Σ output aktual dari semua line produksi yang sudah selesai casting",
+    dataSource: "Production Execution Log",
+    deskripsi: "Jumlah unit yang telah selesai diproduksi hari ini.",
+    breakdown: [
+      { label: "LINE-A · Pipa Beton", value: 42, unit: "unit", color: "#0A6ED1" },
+      { label: "LINE-B · U-Ditch", value: 56, unit: "unit", color: "#0070F2" },
+      { label: "LINE-C · Box Culvert", value: 18, unit: "unit", color: "#E9730C" },
+      { label: "LINE-D · Barrier", value: 16, unit: "unit", color: "#59687A" },
+    ],
+  },
+  "kpi-achievement": {
+    label: "Pencapaian", formula: "Pencapaian (%) = (Realisasi ÷ Target) × 100",
+    dataSource: "Dihitung dari Target & Realisasi",
+    deskripsi: "Persentase realisasi dibanding target produksi.",
+    breakdown: [
+      { label: "Realisasi", value: 132, unit: "unit", color: "#107E3E" },
+      { label: "Target", value: 150, unit: "unit", color: "#59687A" },
+      { label: "Gap", value: 18, unit: "unit", color: "#B00020" },
+      { label: "Pencapaian", value: "88,0%", color: "#0A6ED1" },
+    ],
+  },
+  "kpi-curing": {
+    label: "Dalam Curing", formula: "Σ unit aktif di semua chamber curing (status: Steam Curing)",
+    dataSource: "Curing Management",
+    deskripsi: "Jumlah unit yang sedang berada dalam proses curing.",
+    breakdown: [
+      { label: "Curing Chamber A", value: 96, unit: "unit", color: "#E9730C" },
+      { label: "Curing Chamber B", value: 78, unit: "unit", color: "#E9730C" },
+      { label: "Curing Chamber C", value: 74, unit: "unit", color: "#FBC36C" },
+      { label: "Total", value: 248, unit: "unit", color: "#0A6ED1" },
+    ],
+  },
+  "kpi-qc": {
+    label: "Siap QC", formula: "Σ unit yang sudah selesai curing & demoulding, antri di area QC",
+    dataSource: "Production Execution · WIP",
+    deskripsi: "Jumlah unit yang telah selesai curing dan menunggu inspeksi QC.",
+    breakdown: [
+      { label: "Antri QC Lab", value: 28, unit: "unit", color: "#0A6ED1" },
+      { label: "Inspeksi Visual", value: 12, unit: "unit", color: "#0070F2" },
+      { label: "Uji Dimensi", value: 5, unit: "unit", color: "#107E3E" },
+    ],
+  },
+  "kpi-reject": {
+    label: "Reject Rate", formula: "Reject Rate (%) = (Σ Reject ÷ Σ Inspeksi) × 100 dalam 7 hari terakhir",
+    dataSource: "Quality Control · Reject Log",
+    deskripsi: "Persentase produk yang gagal memenuhi standar mutu.",
+    breakdown: [
+      { label: "Retak Struktural", value: 14, unit: "kasus", color: "#B00020" },
+      { label: "Dimensi", value: 11, unit: "kasus", color: "#E9730C" },
+      { label: "Honeycomb", value: 9, unit: "kasus", color: "#E9730C" },
+      { label: "Cacat Permukaan", value: 8, unit: "kasus", color: "#FBC36C" },
+    ],
+  },
+  "kpi-stok": {
+    label: "Stok Produk Jadi", formula: "Σ stok available di semua gudang Finished Goods",
+    dataSource: "Inventory · Finished Goods",
+    deskripsi: "Jumlah produk jadi yang tersedia di gudang.",
+    breakdown: [
+      { label: "WH-FG Bekasi", value: 1842, unit: "unit", color: "#107E3E" },
+      { label: "Reserved", value: 528, unit: "unit", color: "#E9730C" },
+      { label: "Available", value: 1314, unit: "unit", color: "#0A6ED1" },
+    ],
+  },
+  "kpi-material": {
+    label: "Pemakaian Material", formula: "Σ konsumsi material (semen + agregat + besi) hari ini",
+    dataSource: "Stock Movement · Material Consumption",
+    deskripsi: "Total material yang digunakan selama periode berjalan.",
+    breakdown: [
+      { label: "Semen Portland", value: 28.4, unit: "ton", color: "#59687A" },
+      { label: "Agregat Halus", value: 36.2, unit: "ton", color: "#0070F2" },
+      { label: "Agregat Kasar", value: 14.6, unit: "ton", color: "#E9730C" },
+      { label: "Besi Tulangan", value: 5.3, unit: "ton", color: "#B00020" },
+    ],
+  },
+  "kpi-mold": {
+    label: "Utilisasi Cetakan", formula: "(Σ Cetakan Aktif ÷ Σ Cetakan Total) × 100",
+    dataSource: "Master Cetakan · Production Lines",
+    deskripsi: "Persentase penggunaan cetakan dibanding kapasitas tersedia.",
+    breakdown: [
+      { label: "Total Cetakan", value: 150, unit: "unit", color: "#59687A" },
+      { label: "Aktif", value: 94, unit: "unit (63%)", color: "#0A6ED1" },
+      { label: "Ready", value: 26, unit: "unit (17%)", color: "#107E3E" },
+      { label: "Maintenance", value: 12, unit: "unit (8%)", color: "#E9730C" },
+      { label: "Cleaning", value: 6, unit: "unit (4%)", color: "#59687A" },
+    ],
+  },
+  "kpi-wip": {
+    label: "Work In Progress", formula: "Σ unit dengan status: Casting + Curing + Demoulding + QC",
+    dataSource: "Production Orders · Status WIP",
+    deskripsi: "Jumlah unit yang masih berada dalam proses produksi.",
+    breakdown: [
+      { label: "Casting", value: 28, unit: "unit", color: "#0A6ED1" },
+      { label: "Curing", value: 248, unit: "unit", color: "#E9730C" },
+      { label: "Demoulding", value: 21, unit: "unit", color: "#0070F2" },
+      { label: "QC", value: 15, unit: "unit", color: "#107E3E" },
+    ],
+  },
+  "kpi-efisiensi": {
+    label: "Efisiensi Produksi", formula: "OEE = Availability × Performance × Quality",
+    dataSource: "Reports · OEE Calculation",
+    deskripsi: "Rasio output aktual terhadap kapasitas produksi.",
+    breakdown: [
+      { label: "Availability", value: "96,4%", color: "#107E3E" },
+      { label: "Performance", value: "98,8%", color: "#107E3E" },
+      { label: "Quality", value: "97,1%", color: "#107E3E" },
+      { label: "OEE", value: "92,4%", color: "#0A6ED1" },
+    ],
+  },
+  "kpi-jadi-hari": {
+    label: "Produk Jadi Hari Ini", formula: "Σ unit yang lulus QC & masuk gudang FG hari ini = Realisasi − Reject",
+    dataSource: "Inventory In-Movement · QC Pass Log",
+    deskripsi: "Jumlah unit yang selesai dan masuk ke gudang produk jadi hari ini.",
+    breakdown: [
+      { label: "Realisasi", value: 132, unit: "unit", color: "#0A6ED1" },
+      { label: "Reject", value: 6, unit: "unit", color: "#B00020" },
+      { label: "Masuk Gudang FG", value: 126, unit: "unit", color: "#107E3E" },
+    ],
+  },
+};
 
 export const formatRupiah = (n) =>
   "Rp " + Number(n).toLocaleString("id-ID");
