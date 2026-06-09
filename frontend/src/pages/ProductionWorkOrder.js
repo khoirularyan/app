@@ -11,9 +11,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Card } from "@/components/ui/card";
-import { Search, Plus, Filter, Download, MoreVertical, Edit, CheckCircle, AlertCircle, Circle, Tool } from "lucide-react";
+import { Search, Plus, Filter, Download, MoreVertical, Edit, CheckCircle, AlertCircle, Circle, Wrench } from "lucide-react";
 
-// Mock data for Work Orders
+// Mock data for Production Execution
 const workOrders = [
   {
     no: "WO-2023-0891",
@@ -109,7 +109,7 @@ const ProductionWorkOrder = () => {
 
   const getStatusIcon = (status) => {
     switch (status) {
-      case "IN PROGRESS": return <Tool className="w-4 h-4 text-blue-600" />;
+      case "IN PROGRESS": return <Wrench className="w-4 h-4 text-blue-600" />;
       case "DELAYED": return <AlertCircle className="w-4 h-4 text-red-600" />;
       case "SCHEDULED": return <Circle className="w-4 h-4 text-gray-400" />;
       case "QUEUED": return <Circle className="w-4 h-4 text-gray-400" />;
@@ -130,9 +130,9 @@ const ProductionWorkOrder = () => {
   return (
     <div>
       <PageHeader
-        title="Production Work Order"
+        title="Production Execution"
         subtitle="Manage and track concrete precast manufacturing cycles."
-        breadcrumbs={["Home", "Production", "Work Orders"]}
+        breadcrumbs={["Home", "Production", "Production Execution"]}
         testId="work-order-page-header"
         actions={
           <div className="flex items-center gap-2">
@@ -150,7 +150,7 @@ const ProductionWorkOrder = () => {
               onClick={handleCreateWO}
             >
               <Plus className="w-3.5 h-3.5" />
-              New Work Order
+              New Production Execution
             </Button>
           </div>
         }
@@ -206,26 +206,26 @@ const ProductionWorkOrder = () => {
                 <div className="text-xs text-gray-600 mt-1">{workOrderStats.wipWO.status}</div>
               </div>
               <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
-                <Tool className="w-6 h-6 text-purple-600" />
+                <Wrench className="w-6 h-6 text-purple-600" />
               </div>
             </div>
           </Card>
         </div>
 
-        {/* Work Orders Table */}
+        {/* Production Execution Table */}
         <div className="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm">
           <div className="flex items-center justify-between p-4 border-b border-gray-200">
             <div>
               <div className="flex items-center gap-2 text-sm font-semibold text-gray-900">
                 <div className="w-1 h-5 bg-blue-600 rounded-full"></div>
-                ACTIVE WORK ORDERS
+                ACTIVE PRODUCTION EXECUTION
               </div>
             </div>
             <div className="flex items-center gap-3">
               <div className="relative">
                 <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
                 <Input
-                  placeholder="Search Work Orders, Products..."
+                  placeholder="Search Production Execution, Products..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="pl-9 h-9 w-64 text-sm"
@@ -441,7 +441,7 @@ const ProductionWorkOrder = () => {
                             {step.status === "completed" ? (
                               <CheckCircle className="w-5 h-5 text-green-600" />
                             ) : step.status === "in-progress" ? (
-                              <Tool className="w-5 h-5 text-blue-600" />
+                              <Wrench className="w-5 h-5 text-blue-600" />
                             ) : (
                               <Circle className="w-5 h-5 text-gray-400" />
                             )}
