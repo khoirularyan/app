@@ -1,20 +1,290 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import PageHeader from "@/components/shared/PageHeader";
 import StatusBadge from "@/components/shared/StatusBadge";
 import KPICard from "@/components/shared/KPICard";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { qcInspections, strengthTests, rejects, rejectByReason } from "@/data/mockData";
-import { ShieldCheck, AlertTriangle, Activity, FlaskConical, Plus } from "lucide-react";
+import {
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter,
+} from "@/components/ui/dialog";
+import { qcInspections, strengthTests, rejects as initialRejects, rejectByReason, defectCategories, productionOrders } from "@/data/mockData";
+import { ShieldCheck, AlertTriangle, Activity, FlaskConical, Plus, Pencil, XCircle, Camera } from "lucide-react";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, BarChart, Bar, XAxis, YAxis, CartesianGrid } from "recharts";
 import FormDialog from "@/components/shared/FormDialog";
 import { DefectIcon, QualityStamp, defectList, reasonToDefectKey } from "@/components/visuals/ProcessIcons";
 import ProductIcon from "@/components/visuals/ProductIcon";
+import { toast } from "sonner";
 
 const COLORS = ["#0A6ED1", "#E9730C", "#107E3E", "#0070F2", "#B00020", "#59687A"];
+const DISPOSISI_OPTIONS = ["Hancurkan", "Rework", "Downgrade", "Repair"];
+
+const SEVERITY_STYLE = {
+  Kritis: { bg: "#FBE6E9", color: "#B00020", border: "#B00020" },
+  Mayor:  { bg: "#FDF3E7", color: "#E9730C", border: "#E9730C" },
+  Minor:  { bg: "#FFF6E0", color: "#9C4F00", border: "#FBC36C" },
+};
+
+const RejectReasonDialog = ({ open, onOpenChange, record, onSave }) => {
+  const isEdit = Boolean(record?.no);
+  const [selected, setSelected] = useState([]);
+  const [produk, setProduk] = useState("");
+  const [qty, setQty] = useState(1);
+  const [po, setPo] = useState("");
+  const [disposisi, setDisposisi] = useState("Rework");
+  const [catatan, setCatatan] = useState("");
+
+  useEffect(() => {
+    if (!open) return;
+    if (record) {
+      const seedAlasan = record.alasanList || (record.alasan ? [record.alasan] : []);
+      const matched = defectCategories.filter((d) =>
+        seedAlasan.some((a) =>
+          d.nama.toLowerCase().includes(a.toLowerCase()) || a.toLowerCase().includes(d.nama.toLowerCase())
+        )
+      );
+      setSelected(matched.map((d) => d.kode));
+      setProduk(record.produk || "");
+      setQty(record.qty || 1);
+      setPo(record.po || "");
+      setDisposisi(record.disposisi || "Rework");
+      setCatatan(record.catatan || "");
+    } else {
+      setSelected([]);
+      setProduk("");
+      setQty(1);
+      setPo("");
+      setDisposisi("Rework");
+      setCatatan("");
+    }
+  }, [open, record]);
+
+  const toggle = (kode) => {
+    setSelected((prev) => prev.includes(kode) ? prev.filter((k) => k !== kode) : [...prev, kode]);
+  };
+
+  // Severity preview (highest level wins)
+  const selectedDefects = defectCategories.filter((d) => selected.includes(d.kode));
+  const highestLevel = selectedDefects.some((d) => d.tingkat === "Kritis") ? "Kritis"
+                      : selectedDefects.some((d) => d.tingkat === "Mayor") ? "Mayor"
+                      : selectedDefects.some((d) => d.tingkat === "Minor") ? "Minor" : null;
+
+  // Suggested disposisi based on severity
+  const suggestedDisposisi = highestLevel === "Kritis" ? "Hancurkan" : highestLevel === "Mayor" ? "Rework" : highestLevel === "Minor" ? "Downgrade" : null;
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-2xl p-0 overflow-hidden" data-testid="reject-reason-dialog">
+        <div className="px-6 py-4 bg-gradient-to-r from-[#B00020] to-[#8A0019] text-white">
+          <DialogHeader>
+            <div className="text-[10px] uppercase tracking-[0.2em] text-white/75 font-semibold">
+              {isEdit ? "Edit Alasan Reject" : "Tandai Produk Reject"}
+            </div>
+            <DialogTitle className="text-base font-display text-white">
+              {isEdit ? record.no : "Reject Baru"}
+            </DialogTitle>
+            <DialogDescription className="text-xs text-white/85">
+              Pilih satu atau lebih kategori cacat sesuai standar SNI 7833:2012
+            </DialogDescription>
+          </DialogHeader>
+        </div>
+
+        <div className="p-6 space-y-4 max-h-[70vh] overflow-y-auto">
+          {/* Identification fields (only for new) */}
+          {!isEdit && (
+            <div className="grid grid-cols-2 gap-3">
+              <div className="col-span-2">
+                <label className="text-[11px] uppercase tracking-wider text-[#59687A] font-semibold">PO Asal</label>
+                <select
+                  value={po} onChange={(e) => setPo(e.target.value)}
+                  data-testid="reject-po-select"
+                  className="w-full mt-1 h-9 px-2.5 text-sm border border-[#DFE3E8] rounded bg-white focus:outline-none focus:ring-2 focus:ring-[#B00020]/30 focus:border-[#B00020]"
+                >
+                  <option value="">Pilih PO…</option>
+                  {productionOrders.map((o) => (
+                    <option key={o.no} value={o.no}>{o.no} — {o.produk}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="text-[11px] uppercase tracking-wider text-[#59687A] font-semibold">Produk</label>
+                <input
+                  type="text" value={produk} onChange={(e) => setProduk(e.target.value)}
+                  data-testid="reject-produk-input"
+                  className="w-full mt-1 h-9 px-2.5 text-sm border border-[#DFE3E8] rounded focus:outline-none focus:ring-2 focus:ring-[#B00020]/30"
+                />
+              </div>
+              <div>
+                <label className="text-[11px] uppercase tracking-wider text-[#59687A] font-semibold">Jumlah Reject</label>
+                <input
+                  type="number" min={1} value={qty} onChange={(e) => setQty(Number(e.target.value))}
+                  data-testid="reject-qty-input"
+                  className="w-full mt-1 h-9 px-2.5 text-sm border border-[#DFE3E8] rounded font-mono-num focus:outline-none focus:ring-2 focus:ring-[#B00020]/30"
+                />
+              </div>
+            </div>
+          )}
+
+          {/* Reason multi-select */}
+          <div>
+            <div className="flex items-center justify-between mb-2">
+              <label className="text-[11px] uppercase tracking-wider text-[#59687A] font-semibold">
+                Alasan Reject <span className="text-[#B00020]">*</span>
+              </label>
+              <span className="text-[10px] text-[#59687A]" data-testid="reject-count">
+                {selected.length} dipilih
+              </span>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-2" data-testid="reject-reason-grid">
+              {defectCategories.filter((d) => d.aktif).map((d) => {
+                const isSel = selected.includes(d.kode);
+                const sev = SEVERITY_STYLE[d.tingkat] || SEVERITY_STYLE.Minor;
+                return (
+                  <button
+                    key={d.kode}
+                    onClick={() => toggle(d.kode)}
+                    data-testid={`reject-reason-${d.kode}`}
+                    className={`text-left p-2.5 rounded border transition-all flex items-start gap-2.5 ${
+                      isSel ? "border-[#B00020] bg-[#FBE6E9]/30 shadow-sm" : "border-[#DFE3E8] hover:border-[#B00020]/50 bg-white"
+                    }`}
+                  >
+                    {/* Checkbox visual */}
+                    <div
+                      className={`w-4 h-4 rounded border-2 flex items-center justify-center flex-shrink-0 mt-0.5 ${
+                        isSel ? "bg-[#B00020] border-[#B00020]" : "border-[#A6B0BE]"
+                      }`}
+                    >
+                      {isSel && <svg className="w-2.5 h-2.5 text-white" viewBox="0 0 12 12"><path d="M2 6 L5 9 L10 3" stroke="currentColor" strokeWidth="2" fill="none" /></svg>}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between gap-1.5 mb-0.5">
+                        <span className="text-xs font-semibold text-[#1C252E] truncate">{d.nama}</span>
+                        <span
+                          className="text-[9px] uppercase tracking-wider px-1.5 py-0.5 rounded font-semibold flex-shrink-0"
+                          style={{ backgroundColor: sev.bg, color: sev.color }}
+                        >
+                          {d.tingkat}
+                        </span>
+                      </div>
+                      <div className="text-[10px] text-[#59687A] line-clamp-1">{d.penyebabUmum}</div>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Severity + disposisi suggestion */}
+          {highestLevel && (
+            <div
+              className="p-3 rounded border flex items-start gap-2.5"
+              style={{ backgroundColor: SEVERITY_STYLE[highestLevel].bg, borderColor: SEVERITY_STYLE[highestLevel].border + "55" }}
+              data-testid="reject-severity-preview"
+            >
+              <AlertTriangle className="w-4 h-4 flex-shrink-0 mt-0.5" style={{ color: SEVERITY_STYLE[highestLevel].color }} />
+              <div className="flex-1 text-xs">
+                <div className="font-semibold" style={{ color: SEVERITY_STYLE[highestLevel].color }}>
+                  Tingkat tertinggi: {highestLevel}
+                </div>
+                <div className="text-[#1C252E] opacity-80 mt-0.5">
+                  Disposisi yang disarankan: <span className="font-semibold">{suggestedDisposisi}</span>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Disposisi + photo upload */}
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="text-[11px] uppercase tracking-wider text-[#59687A] font-semibold">Disposisi</label>
+              <select
+                value={disposisi} onChange={(e) => setDisposisi(e.target.value)}
+                data-testid="reject-disposisi-select"
+                className="w-full mt-1 h-9 px-2.5 text-sm border border-[#DFE3E8] rounded bg-white focus:outline-none focus:ring-2 focus:ring-[#B00020]/30"
+              >
+                {DISPOSISI_OPTIONS.map((d) => <option key={d} value={d}>{d}</option>)}
+              </select>
+            </div>
+            <div>
+              <label className="text-[11px] uppercase tracking-wider text-[#59687A] font-semibold">Foto Bukti (opsional)</label>
+              <button
+                type="button"
+                className="w-full mt-1 h-9 px-2.5 text-sm border border-dashed border-[#DFE3E8] rounded bg-[#F8FAFC] text-[#59687A] hover:border-[#0A6ED1] hover:text-[#0A6ED1] inline-flex items-center justify-center gap-1.5"
+                data-testid="reject-photo-btn"
+              >
+                <Camera className="w-3.5 h-3.5" /> Unggah Foto
+              </button>
+            </div>
+          </div>
+
+          {/* Notes */}
+          <div>
+            <label className="text-[11px] uppercase tracking-wider text-[#59687A] font-semibold">Catatan QC (opsional)</label>
+            <textarea
+              rows={2}
+              value={catatan} onChange={(e) => setCatatan(e.target.value)}
+              data-testid="reject-catatan-input"
+              placeholder="Catatan tambahan untuk tindak lanjut tim produksi…"
+              className="w-full mt-1 px-2.5 py-2 text-sm border border-[#DFE3E8] rounded focus:outline-none focus:ring-2 focus:ring-[#B00020]/30 focus:border-[#B00020] resize-none"
+            />
+          </div>
+
+          <div className="text-[10px] text-[#59687A] border-t border-[#EEF0F2] pt-2">
+            Daftar alasan reject dapat dikonfigurasi lewat <a href="/master-data" className="text-[#0A6ED1] hover:underline">Master Data → Kategori Defect</a>
+          </div>
+        </div>
+
+        <DialogFooter className="px-6 py-3 bg-[#F8FAFC] border-t border-[#EEF0F2]">
+          <Button variant="outline" size="sm" onClick={() => onOpenChange(false)} data-testid="reject-cancel">Batal</Button>
+          <Button
+            size="sm"
+            className="bg-[#B00020] hover:bg-[#8A0019] text-white"
+            data-testid="reject-save"
+            onClick={() => {
+              if (selected.length === 0) { toast.error("Minimal pilih 1 alasan reject"); return; }
+              if (!isEdit && !po) { toast.error("PO asal wajib dipilih"); return; }
+              const alasanNames = defectCategories.filter((d) => selected.includes(d.kode)).map((d) => d.nama);
+              onSave({
+                alasanList: alasanNames,
+                alasan: alasanNames[0],
+                disposisi, catatan,
+                tingkat: highestLevel,
+                ...(isEdit ? {} : { produk, qty, po }),
+              });
+              onOpenChange(false);
+            }}
+          >
+            <XCircle className="w-3.5 h-3.5 mr-1.5" /> {isEdit ? "Simpan Alasan" : "Tandai Reject"}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+};
 
 const QualityControl = () => {
   const [tab, setTab] = useState("inspections");
+  const [rejects, setRejects] = useState(initialRejects);
+  const [rejectDialog, setRejectDialog] = useState({ open: false, record: null });
+
+  const openNewReject = () => setRejectDialog({ open: true, record: null });
+  const openEditReject = (rec) => setRejectDialog({ open: true, record: rec });
+  const closeRejectDialog = () => setRejectDialog({ open: false, record: null });
+
+  const handleSaveReject = (data) => {
+    if (rejectDialog.record) {
+      setRejects((prev) => prev.map((r) => r.no === rejectDialog.record.no ? { ...r, ...data } : r));
+      toast.success(`${rejectDialog.record.no} diperbarui`, { description: `${data.alasanList.length} alasan · ${data.disposisi}` });
+    } else {
+      const nextNum = String(rejects.length + 19).padStart(3, "0");
+      const newRec = {
+        no: `REJ-2026-${nextNum}`,
+        tanggal: new Date().toISOString().slice(0, 10),
+        ...data,
+      };
+      setRejects((prev) => [newRec, ...prev]);
+      toast.success(`Reject ${newRec.no} dibuat`, { description: `${data.alasanList.length} alasan · ${data.disposisi}` });
+    }
+  };
 
   return (
     <div>
@@ -162,6 +432,20 @@ const QualityControl = () => {
 
           <TabsContent value="rejects" className="mt-4">
             <div className="bg-white border border-[#DFE3E8] rounded-md overflow-hidden">
+              <div className="flex items-center justify-between px-4 py-3 border-b border-[#DFE3E8]">
+                <div>
+                  <div className="text-base font-semibold text-[#1C252E] font-display">Reject Management</div>
+                  <div className="text-xs text-[#59687A]">Total {rejects.length} reject tercatat · Klik <span className="text-[#0A6ED1] font-medium">Edit Alasan</span> untuk mengubah alasan reject</div>
+                </div>
+                <Button
+                  size="sm"
+                  className="h-8 text-xs gap-1.5 bg-[#B00020] hover:bg-[#8A0019] text-white"
+                  onClick={openNewReject}
+                  data-testid="reject-new-btn"
+                >
+                  <Plus className="w-3.5 h-3.5" /> Tandai Reject
+                </Button>
+              </div>
               <table className="w-full mes-table">
                 <thead>
                   <tr>
@@ -174,29 +458,57 @@ const QualityControl = () => {
                     <th className="px-4 py-2 text-left">Tanggal</th>
                     <th className="px-4 py-2 text-left">Disposisi</th>
                     <th className="px-4 py-2 text-left">Status</th>
+                    <th className="px-4 py-2 text-right">Aksi</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {rejects.map((r, i) => (
-                    <tr key={r.no} data-testid={`reject-row-${i}`}>
-                      <td className="px-4 font-mono-num text-[#B00020] font-medium">{r.no}</td>
-                      <td className="px-4">
-                        <DefectIcon type={reasonToDefectKey(r.alasan)} className="w-12 h-9" />
-                      </td>
-                      <td className="px-4">
-                        <div className="flex items-center gap-2">
-                          <ProductIcon name={r.produk} size="sm" />
-                          <span className="font-medium">{r.produk}</span>
-                        </div>
-                      </td>
-                      <td className="px-4 text-right font-mono-num">{r.qty}</td>
-                      <td className="px-4">{r.alasan}</td>
-                      <td className="px-4 font-mono-num text-[#59687A]">{r.po}</td>
-                      <td className="px-4 font-mono-num text-[#59687A]">{r.tanggal}</td>
-                      <td className="px-4"><StatusBadge status={r.disposisi} variant="warning" /></td>
-                      <td className="px-4"><QualityStamp type="reject" /></td>
-                    </tr>
-                  ))}
+                  {rejects.map((r, i) => {
+                    const reasons = r.alasanList || (r.alasan ? [r.alasan] : []);
+                    return (
+                      <tr key={r.no} data-testid={`reject-row-${i}`}>
+                        <td className="px-4 font-mono-num text-[#B00020] font-medium">{r.no}</td>
+                        <td className="px-4">
+                          <DefectIcon type={reasonToDefectKey(reasons[0] || "")} className="w-12 h-9" />
+                        </td>
+                        <td className="px-4">
+                          <div className="flex items-center gap-2">
+                            <ProductIcon name={r.produk} size="sm" />
+                            <span className="font-medium">{r.produk}</span>
+                          </div>
+                        </td>
+                        <td className="px-4 text-right font-mono-num">{r.qty}</td>
+                        <td className="px-4">
+                          <div className="flex flex-wrap gap-1 max-w-[260px]">
+                            {reasons.slice(0, 2).map((a, idx) => (
+                              <span key={idx} className="text-[10px] px-1.5 py-0.5 rounded bg-[#FBE6E9] text-[#B00020] font-medium">
+                                {a}
+                              </span>
+                            ))}
+                            {reasons.length > 2 && (
+                              <span className="text-[10px] px-1.5 py-0.5 rounded bg-[#F4F6F8] text-[#59687A] font-medium">
+                                +{reasons.length - 2}
+                              </span>
+                            )}
+                          </div>
+                        </td>
+                        <td className="px-4 font-mono-num text-[#59687A]">{r.po}</td>
+                        <td className="px-4 font-mono-num text-[#59687A]">{r.tanggal}</td>
+                        <td className="px-4"><StatusBadge status={r.disposisi} variant="warning" /></td>
+                        <td className="px-4"><QualityStamp type="reject" /></td>
+                        <td className="px-4 text-right">
+                          <Button
+                            data-testid={`btn-edit-reject-${i}`}
+                            variant="outline"
+                            size="sm"
+                            className="h-7 text-[11px] gap-1 hover:bg-[#FBE6E9] hover:border-[#B00020] hover:text-[#B00020]"
+                            onClick={() => openEditReject(r)}
+                          >
+                            <Pencil className="w-3 h-3" /> Edit Alasan
+                          </Button>
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
@@ -262,6 +574,13 @@ const QualityControl = () => {
             </div>
           </TabsContent>
         </Tabs>
+
+        <RejectReasonDialog
+          open={rejectDialog.open}
+          onOpenChange={(o) => { if (!o) closeRejectDialog(); }}
+          record={rejectDialog.record}
+          onSave={handleSaveReject}
+        />
       </div>
     </div>
   );

@@ -361,7 +361,6 @@ export const efficiencyByLine = [
 
 export const navigationItems = [
   { id: "dashboard", label: "Dashboard", icon: "LayoutDashboard", path: "/" },
-  { id: "business-flow", label: "Alur Bisnis", icon: "Workflow", path: "/business-flow" },
   { id: "master-data", label: "Master Data", icon: "Database", path: "/master-data" },
   { id: "master-process", label: "Master Proses", icon: "GitBranch", path: "/master-process" },
   { id: "planning", label: "Perencanaan Produksi", icon: "CalendarRange", path: "/planning" },
