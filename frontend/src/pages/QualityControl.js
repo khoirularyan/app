@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { qcInspections, strengthTests, rejects, rejectByReason } from "@/data/mockData";
 import { ShieldCheck, AlertTriangle, Activity, FlaskConical, Plus } from "lucide-react";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, BarChart, Bar, XAxis, YAxis, CartesianGrid } from "recharts";
+import FormDialog from "@/components/shared/FormDialog";
 
 const COLORS = ["#0A6ED1", "#E9730C", "#107E3E", "#0070F2", "#B00020", "#59687A"];
 
@@ -21,7 +22,42 @@ const QualityControl = () => {
         breadcrumbs={["Beranda", "Quality Control"]}
         testId="qc-page-header"
         actions={
-          <Button size="sm" className="h-8 text-xs gap-1.5 bg-[#0A6ED1] hover:bg-[#0854A1]"><Plus className="w-3.5 h-3.5" />Inspeksi Baru</Button>
+          <FormDialog
+            testId="qc-create"
+            title="Inspeksi QC Baru"
+            description="Catat hasil inspeksi quality control untuk batch produk"
+            submitLabel="Simpan Inspeksi"
+            successMessage="Inspeksi QC berhasil disimpan"
+            fields={[
+              { name: "po", label: "PO / Batch", type: "select", required: true, options: [
+                { value: "PO-2026-0241", label: "PO-2026-0241 — U-Ditch 500" },
+                { value: "PO-2026-0242", label: "PO-2026-0242 — U-Ditch 800" },
+                { value: "PO-2026-0243", label: "PO-2026-0243 — Box Culvert 1500" },
+              ]},
+              { name: "jenis", label: "Jenis Inspeksi", type: "select", required: true, options: [
+                { value: "dimensi", label: "Inspeksi Dimensi" },
+                { value: "visual", label: "Inspeksi Visual" },
+                { value: "kuatTekan", label: "Uji Kuat Tekan" },
+                { value: "full", label: "Inspeksi Lengkap" },
+              ]},
+              { name: "qty", label: "Jumlah Diinspeksi", type: "number", required: true },
+              { name: "lulus", label: "Jumlah Lulus", type: "number" },
+              { name: "kuatTekan", label: "Kuat Tekan (MPa)", type: "number", placeholder: "Mis. 32.4" },
+              { name: "inspektur", label: "Inspektur", type: "select", required: true, options: [
+                { value: "Rina Kusumawati", label: "Rina Kusumawati" },
+                { value: "Hendra Gunawan", label: "Hendra Gunawan" },
+              ]},
+              { name: "hasil", label: "Hasil", type: "select", options: [
+                { value: "Lulus", label: "Lulus" },
+                { value: "Lulus Bersyarat", label: "Lulus Bersyarat" },
+                { value: "Reject", label: "Reject" },
+              ]},
+              { name: "catatan", label: "Catatan Inspeksi", type: "textarea", span: 2 },
+            ]}
+            trigger={
+              <Button size="sm" className="h-8 text-xs gap-1.5 bg-[#0A6ED1] hover:bg-[#0854A1]"><Plus className="w-3.5 h-3.5" />Inspeksi Baru</Button>
+            }
+          />
         }
       />
       <div className="p-6 space-y-6">

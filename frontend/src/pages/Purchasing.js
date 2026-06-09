@@ -2,8 +2,10 @@ import PageHeader from "@/components/shared/PageHeader";
 import StatusBadge from "@/components/shared/StatusBadge";
 import KPICard from "@/components/shared/KPICard";
 import { Button } from "@/components/ui/button";
-import { purchaseOrders, formatRupiah } from "@/data/mockData";
+import { purchaseOrders, suppliers, materials, formatRupiah } from "@/data/mockData";
 import { ShoppingBag, Truck, FileText, Plus, Download } from "lucide-react";
+import FormDialog from "@/components/shared/FormDialog";
+import { showExportToast } from "@/components/shared/FilterPopover";
 
 const Purchasing = () => {
   const totalNilai = purchaseOrders.reduce((s, p) => s + p.nilai, 0);
@@ -17,8 +19,32 @@ const Purchasing = () => {
         testId="purchasing-page-header"
         actions={
           <>
-            <Button variant="outline" size="sm" className="h-8 text-xs gap-1.5"><Download className="w-3.5 h-3.5" />Ekspor</Button>
-            <Button size="sm" className="h-8 text-xs gap-1.5 bg-[#0A6ED1] hover:bg-[#0854A1]"><Plus className="w-3.5 h-3.5" />PO Baru</Button>
+            <Button variant="outline" size="sm" className="h-8 text-xs gap-1.5" onClick={() => showExportToast("purchase orders")}><Download className="w-3.5 h-3.5" />Ekspor</Button>
+            <FormDialog
+              testId="po-purchase-create"
+              title="Purchase Order Baru"
+              description="Buat PO pembelian bahan baku dari supplier"
+              submitLabel="Buat PO"
+              successMessage="Purchase Order berhasil dibuat"
+              fields={[
+                { name: "supplier", label: "Supplier", type: "select", required: true, options: suppliers.map(s => ({ value: s.kode, label: s.nama })) },
+                { name: "material", label: "Material", type: "select", required: true, options: materials.map(m => ({ value: m.kode, label: `${m.kode} — ${m.nama}` })) },
+                { name: "qty", label: "Quantity", type: "number", required: true },
+                { name: "satuan", label: "Satuan", type: "select", options: [
+                  { value: "kg", label: "kg" }, { value: "ton", label: "ton" },
+                  { value: "m3", label: "m³" }, { value: "liter", label: "liter" },
+                  { value: "lembar", label: "lembar" },
+                ]},
+                { name: "harga", label: "Harga Satuan (Rp)", type: "number" },
+                { name: "tglTiba", label: "Estimasi Tiba", type: "date", required: true },
+                { name: "termin", label: "Termin Pembayaran", type: "select", options: [
+                  { value: "tunai", label: "Tunai" }, { value: "30hari", label: "30 Hari" },
+                  { value: "60hari", label: "60 Hari" },
+                ]},
+                { name: "catatan", label: "Catatan", type: "textarea", span: 2 },
+              ]}
+              trigger={<Button size="sm" className="h-8 text-xs gap-1.5 bg-[#0A6ED1] hover:bg-[#0854A1]"><Plus className="w-3.5 h-3.5" />PO Baru</Button>}
+            />
           </>
         }
       />

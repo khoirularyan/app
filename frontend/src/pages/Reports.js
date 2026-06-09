@@ -11,6 +11,7 @@ import {
   BarChart, Bar, LineChart, Line, AreaChart, Area, PieChart, Pie, Cell,
   XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, RadialBarChart, RadialBar
 } from "recharts";
+import { showExportToast, showPrintToast } from "@/components/shared/FilterPopover";
 
 const COLORS = ["#0A6ED1", "#107E3E", "#E9730C", "#0070F2", "#B00020", "#59687A", "#9AA5B1", "#0854A1"];
 
@@ -36,8 +37,8 @@ const Reports = () => {
         testId="reports-page-header"
         actions={
           <>
-            <Button variant="outline" size="sm" className="h-8 text-xs gap-1.5"><Printer className="w-3.5 h-3.5" />Cetak</Button>
-            <Button size="sm" className="h-8 text-xs gap-1.5 bg-[#0A6ED1] hover:bg-[#0854A1]"><Download className="w-3.5 h-3.5" />Ekspor PDF</Button>
+            <Button variant="outline" size="sm" className="h-8 text-xs gap-1.5" onClick={showPrintToast}><Printer className="w-3.5 h-3.5" />Cetak</Button>
+            <Button size="sm" className="h-8 text-xs gap-1.5 bg-[#0A6ED1] hover:bg-[#0854A1]" onClick={() => showExportToast("laporan PDF")}><Download className="w-3.5 h-3.5" />Ekspor PDF</Button>
           </>
         }
       />

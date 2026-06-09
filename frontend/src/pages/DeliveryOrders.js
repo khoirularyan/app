@@ -2,8 +2,9 @@ import PageHeader from "@/components/shared/PageHeader";
 import StatusBadge from "@/components/shared/StatusBadge";
 import KPICard from "@/components/shared/KPICard";
 import { Button } from "@/components/ui/button";
-import { deliveryOrders } from "@/data/mockData";
+import { deliveryOrders, customers } from "@/data/mockData";
 import { Truck, MapPin, Clock, CheckCircle2, Plus } from "lucide-react";
+import FormDialog from "@/components/shared/FormDialog";
 
 const DeliveryOrders = () => {
   return (
@@ -13,7 +14,30 @@ const DeliveryOrders = () => {
         subtitle="Manajemen delivery order dan pengiriman produk ke customer"
         breadcrumbs={["Beranda", "Pengiriman"]}
         testId="delivery-page-header"
-        actions={<Button size="sm" className="h-8 text-xs gap-1.5 bg-[#0A6ED1] hover:bg-[#0854A1]"><Plus className="w-3.5 h-3.5" />DO Baru</Button>}
+        actions={
+          <FormDialog
+            testId="do-create"
+            title="Delivery Order Baru"
+            description="Buat surat jalan pengiriman ke customer"
+            submitLabel="Buat DO"
+            successMessage="Delivery Order berhasil dibuat"
+            fields={[
+              { name: "so", label: "Sales Order", type: "select", required: true, options: [
+                { value: "SO-2026-0095", label: "SO-2026-0095 — PT Adhi Karya" },
+                { value: "SO-2026-0096", label: "SO-2026-0096 — Dinas PU Surabaya" },
+                { value: "SO-2026-0097", label: "SO-2026-0097 — PT Hutama Karya" },
+              ]},
+              { name: "customer", label: "Customer", type: "select", required: true, options: customers.map(c => ({ value: c.kode, label: c.nama })) },
+              { name: "muatan", label: "Muatan", type: "text", span: 2, placeholder: "Mis. 80 U-Ditch 500 + 160 Cover" },
+              { name: "truk", label: "Nomor Polisi Truk", type: "text", placeholder: "Mis. B-9012-AB" },
+              { name: "driver", label: "Driver", type: "text", placeholder: "Nama driver" },
+              { name: "tglKirim", label: "Tanggal Kirim", type: "date", required: true },
+              { name: "tujuan", label: "Tujuan", type: "text" },
+              { name: "catatan", label: "Catatan Pengiriman", type: "textarea", span: 2 },
+            ]}
+            trigger={<Button size="sm" className="h-8 text-xs gap-1.5 bg-[#0A6ED1] hover:bg-[#0854A1]"><Plus className="w-3.5 h-3.5" />DO Baru</Button>}
+          />
+        }
       />
       <div className="p-6 space-y-6">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">

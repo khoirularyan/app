@@ -2,8 +2,10 @@ import PageHeader from "@/components/shared/PageHeader";
 import StatusBadge from "@/components/shared/StatusBadge";
 import KPICard from "@/components/shared/KPICard";
 import { Button } from "@/components/ui/button";
-import { salesOrders, formatRupiah } from "@/data/mockData";
+import { salesOrders, customers, products, formatRupiah } from "@/data/mockData";
 import { ShoppingCart, TrendingUp, FileCheck, Clock, Plus, Download } from "lucide-react";
+import FormDialog from "@/components/shared/FormDialog";
+import { showExportToast } from "@/components/shared/FilterPopover";
 
 const SalesOrders = () => {
   const totalNilai = salesOrders.reduce((s, o) => s + o.nilai, 0);
@@ -18,8 +20,30 @@ const SalesOrders = () => {
         testId="sales-page-header"
         actions={
           <>
-            <Button variant="outline" size="sm" className="h-8 text-xs gap-1.5"><Download className="w-3.5 h-3.5" />Ekspor</Button>
-            <Button size="sm" className="h-8 text-xs gap-1.5 bg-[#0A6ED1] hover:bg-[#0854A1]"><Plus className="w-3.5 h-3.5" />Sales Order Baru</Button>
+            <Button variant="outline" size="sm" className="h-8 text-xs gap-1.5" onClick={() => showExportToast("sales orders")}><Download className="w-3.5 h-3.5" />Ekspor</Button>
+            <FormDialog
+              testId="so-create"
+              title="Sales Order Baru"
+              description="Catat order baru dari customer"
+              submitLabel="Buat Sales Order"
+              successMessage="Sales order berhasil dibuat"
+              fields={[
+                { name: "customer", label: "Customer", type: "select", required: true, options: customers.map(c => ({ value: c.kode, label: c.nama })) },
+                { name: "produk", label: "Produk Utama", type: "select", required: true, options: products.map(p => ({ value: p.kode, label: `${p.kode} — ${p.nama}` })) },
+                { name: "qty", label: "Quantity", type: "number", required: true },
+                { name: "nilai", label: "Nilai Order (Rp)", type: "number", required: true },
+                { name: "tglOrder", label: "Tanggal Order", type: "date", required: true },
+                { name: "tglKirim", label: "Tanggal Kirim", type: "date", required: true },
+                { name: "termPayment", label: "Termin Pembayaran", type: "select", options: [
+                  { value: "tunai", label: "Tunai" },
+                  { value: "30hari", label: "30 Hari" },
+                  { value: "60hari", label: "60 Hari" },
+                  { value: "90hari", label: "90 Hari" },
+                ]},
+                { name: "alamatKirim", label: "Alamat Pengiriman", type: "textarea", span: 2 },
+              ]}
+              trigger={<Button size="sm" className="h-8 text-xs gap-1.5 bg-[#0A6ED1] hover:bg-[#0854A1]"><Plus className="w-3.5 h-3.5" />Sales Order Baru</Button>}
+            />
           </>
         }
       />

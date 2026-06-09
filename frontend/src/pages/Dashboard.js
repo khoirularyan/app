@@ -14,8 +14,8 @@ import {
   LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
   Legend, ResponsiveContainer, Area, AreaChart
 } from "recharts";
-
-const Dashboard = () => {
+import { showExportToast, showRefreshToast } from "@/components/shared/FilterPopover";
+import { toast } from "sonner";const Dashboard = () => {
   return (
     <div>
       <PageHeader
@@ -25,10 +25,10 @@ const Dashboard = () => {
         testId="dashboard-page-header"
         actions={
           <>
-            <Button data-testid="btn-refresh" variant="outline" size="sm" className="h-8 text-xs gap-1.5">
+            <Button data-testid="btn-refresh" variant="outline" size="sm" className="h-8 text-xs gap-1.5" onClick={showRefreshToast}>
               <RefreshCw className="w-3.5 h-3.5" /> Perbarui
             </Button>
-            <Button data-testid="btn-export" size="sm" className="h-8 text-xs gap-1.5 bg-[#0A6ED1] hover:bg-[#0854A1]">
+            <Button data-testid="btn-export" size="sm" className="h-8 text-xs gap-1.5 bg-[#0A6ED1] hover:bg-[#0854A1]" onClick={() => showExportToast("laporan dashboard")}>
               <Download className="w-3.5 h-3.5" /> Ekspor Laporan
             </Button>
           </>
@@ -114,7 +114,7 @@ const Dashboard = () => {
                 <div className="text-[11px] uppercase tracking-wider text-[#59687A] font-semibold">Top Produk</div>
                 <div className="text-base font-semibold text-[#1C252E] font-display">Bulan Ini</div>
               </div>
-              <Button variant="link" size="sm" className="text-xs text-[#0A6ED1] h-auto p-0">Lihat semua →</Button>
+              <Button variant="link" size="sm" className="text-xs text-[#0A6ED1] h-auto p-0" onClick={() => toast.info("Membuka daftar lengkap top produk...")}>Lihat semua →</Button>
             </div>
             <div className="space-y-3">
               {topProducts.map((p, i) => (
@@ -141,7 +141,7 @@ const Dashboard = () => {
                 <div className="text-[11px] uppercase tracking-wider text-[#59687A] font-semibold">Aktivitas Produksi</div>
                 <div className="text-base font-semibold text-[#1C252E] font-display">Timeline Hari Ini</div>
               </div>
-              <Button variant="link" size="sm" className="text-xs text-[#0A6ED1] h-auto p-0">Log lengkap →</Button>
+              <Button variant="link" size="sm" className="text-xs text-[#0A6ED1] h-auto p-0" onClick={() => toast.info("Membuka log aktivitas lengkap...")}>Log lengkap →</Button>
             </div>
             <div className="space-y-0 -mx-4">
               {recentActivities.map((a, i) => (

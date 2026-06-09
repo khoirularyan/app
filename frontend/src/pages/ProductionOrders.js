@@ -1,12 +1,16 @@
 import { useState } from "react";
+import { toast } from "sonner";
 import PageHeader from "@/components/shared/PageHeader";
 import StatusBadge from "@/components/shared/StatusBadge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
-import { productionOrders } from "@/data/mockData";
+import { productionOrders, customers, products } from "@/data/mockData";
 import { Plus, Search, Filter, Download, Eye } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import FormDialog from "@/components/shared/FormDialog";
+import DetailDialog from "@/components/shared/DetailDialog";
+import FilterPopover, { showExportToast } from "@/components/shared/FilterPopover";
 
 const ProductionOrders = () => {
   const [query, setQuery] = useState("");
@@ -30,8 +34,40 @@ const ProductionOrders = () => {
         testId="po-page-header"
         actions={
           <>
-            <Button variant="outline" size="sm" className="h-8 text-xs gap-1.5"><Download className="w-3.5 h-3.5" />Ekspor</Button>
-            <Button size="sm" className="h-8 text-xs gap-1.5 bg-[#0A6ED1] hover:bg-[#0854A1]" data-testid="btn-create-po"><Plus className="w-3.5 h-3.5" />Order Baru</Button>
+            <Button variant="outline" size="sm" className="h-8 text-xs gap-1.5" onClick={() => showExportToast("daftar order produksi")}>
+              <Download className="w-3.5 h-3.5" />Ekspor
+            </Button>
+            <FormDialog
+              testId="po-create"
+              title="Order Produksi Baru"
+              description="Buat order produksi baru untuk dikerjakan oleh line produksi"
+              submitLabel="Buat Order"
+              successMessage="Order produksi berhasil dibuat"
+              fields={[
+                { name: "produk", label: "Produk", type: "select", required: true, options: products.map(p => ({ value: p.kode, label: `${p.kode} — ${p.nama}` })) },
+                { name: "qty", label: "Quantity (unit)", type: "number", placeholder: "Mis. 50", required: true },
+                { name: "line", label: "Line Produksi", type: "select", required: true, options: [
+                  { value: "LINE-A", label: "Line A - Pipa Beton" },
+                  { value: "LINE-B", label: "Line B - U-Ditch" },
+                  { value: "LINE-C", label: "Line C - Box Culvert" },
+                  { value: "LINE-D", label: "Line D - Barrier" },
+                ]},
+                { name: "customer", label: "Customer", type: "select", required: true, options: customers.map(c => ({ value: c.kode, label: c.nama })) },
+                { name: "tglMulai", label: "Tanggal Mulai", type: "date", required: true },
+                { name: "tglSelesai", label: "Target Selesai", type: "date", required: true },
+                { name: "prioritas", label: "Prioritas", type: "select", options: [
+                  { value: "Tinggi", label: "Tinggi" },
+                  { value: "Sedang", label: "Sedang" },
+                  { value: "Rendah", label: "Rendah" },
+                ]},
+                { name: "catatan", label: "Catatan Produksi", type: "textarea", span: 2, placeholder: "Spesifikasi khusus, persyaratan kualitas, dll." },
+              ]}
+              trigger={
+                <Button size="sm" className="h-8 text-xs gap-1.5 bg-[#0A6ED1] hover:bg-[#0854A1]" data-testid="btn-create-po">
+                  <Plus className="w-3.5 h-3.5" />Order Baru
+                </Button>
+              }
+            />
           </>
         }
       />
@@ -77,7 +113,23 @@ const ProductionOrders = () => {
                   ))}
                 </SelectContent>
               </Select>
-              <Button variant="outline" size="sm" className="h-8 text-xs gap-1.5"><Filter className="w-3.5 h-3.5" />Filter</Button>
+              <Button variant="outline" size="sm" className="h-8 text-xs gap-1.5" onClick={() => toast.info("Filter cepat dibuka")}><Filter className="w-3.5 h-3.5" />Filter Cepat</Button>
+              <FilterPopover
+                testId="po-filter"
+                selects={[
+                  { name: "line", label: "Line", options: [
+                    { value: "LINE-A", label: "Line A" },
+                    { value: "LINE-B", label: "Line B" },
+                    { value: "LINE-C", label: "Line C" },
+                    { value: "LINE-D", label: "Line D" },
+                  ]},
+                  { name: "prioritas", label: "Prioritas", options: [
+                    { value: "Tinggi", label: "Tinggi" },
+                    { value: "Sedang", label: "Sedang" },
+                    { value: "Rendah", label: "Rendah" },
+                  ]},
+                ]}
+              />
             </div>
           </div>
 
@@ -115,9 +167,40 @@ const ProductionOrders = () => {
                     <td className="px-4"><StatusBadge status={o.status} /></td>
                     <td className="px-4"><StatusBadge status={o.prioritas} /></td>
                     <td className="px-4">
-                      <Button variant="ghost" size="sm" className="h-7 w-7 p-0" data-testid={`po-view-${i}`}>
-                        <Eye className="w-3.5 h-3.5" />
-                      </Button>
+                      <DetailDialog
+                        testId={`po-detail-${i}`}
+                        title={`Order ${o.no}`}
+                        subtitle={`${o.produk} • ${o.qty} unit`}
+                        status={o.status}
+                        progress={o.progress}
+                        sections={[
+                          { title: "Informasi Order", items: [
+                            { label: "No. Order", value: o.no },
+                            { label: "Produk", value: o.produk },
+                            { label: "Quantity", value: `${o.qty} unit` },
+                            { label: "Line Produksi", value: o.line },
+                            { label: "Customer", value: o.customer },
+                            { label: "Prioritas", value: o.prioritas, render: (v) => <StatusBadge status={v} /> },
+                          ]},
+                          { title: "Jadwal", items: [
+                            { label: "Tanggal Mulai", value: o.tglMulai },
+                            { label: "Target Selesai", value: o.tglSelesai },
+                            { label: "Status Saat Ini", value: o.status, render: (v) => <StatusBadge status={v} /> },
+                            { label: "Progress", value: `${o.progress}%` },
+                          ]},
+                          { title: "Material & BOM", items: [
+                            { label: "Mutu Beton", value: "K-350" },
+                            { label: "Estimasi Semen", value: `${Math.round(o.qty * 0.42)} kg` },
+                            { label: "Estimasi Besi", value: `${Math.round(o.qty * 0.18)} kg` },
+                            { label: "Cetakan Digunakan", value: `${Math.min(o.qty, 8)} unit` },
+                          ]},
+                        ]}
+                        trigger={
+                          <Button variant="ghost" size="sm" className="h-7 w-7 p-0" data-testid={`po-view-${i}`}>
+                            <Eye className="w-3.5 h-3.5" />
+                          </Button>
+                        }
+                      />
                     </td>
                   </tr>
                 ))}

@@ -4,6 +4,7 @@ import KPICard from "@/components/shared/KPICard";
 import { Button } from "@/components/ui/button";
 import { maintenanceLog, machines } from "@/data/mockData";
 import { Wrench, AlertTriangle, CheckCircle2, Clock, Plus } from "lucide-react";
+import FormDialog from "@/components/shared/FormDialog";
 
 const Maintenance = () => {
   return (
@@ -13,7 +14,37 @@ const Maintenance = () => {
         subtitle="Manajemen preventive & corrective maintenance mesin produksi"
         breadcrumbs={["Beranda", "Pemeliharaan"]}
         testId="maint-page-header"
-        actions={<Button size="sm" className="h-8 text-xs gap-1.5 bg-[#0A6ED1] hover:bg-[#0854A1]"><Plus className="w-3.5 h-3.5" />Work Order Baru</Button>}
+        actions={
+          <FormDialog
+            testId="wo-create"
+            title="Work Order Maintenance Baru"
+            description="Buat work order pemeliharaan mesin"
+            submitLabel="Buat Work Order"
+            successMessage="Work Order maintenance berhasil dibuat"
+            fields={[
+              { name: "mesin", label: "Mesin", type: "select", required: true, options: machines.map(m => ({ value: m.kode, label: `${m.kode} — ${m.nama}` })) },
+              { name: "tipe", label: "Tipe Maintenance", type: "select", required: true, options: [
+                { value: "Preventif", label: "Preventif" },
+                { value: "Korektif", label: "Korektif" },
+                { value: "Prediktif", label: "Prediktif" },
+              ]},
+              { name: "prioritas", label: "Prioritas", type: "select", options: [
+                { value: "Tinggi", label: "Tinggi" },
+                { value: "Sedang", label: "Sedang" },
+                { value: "Rendah", label: "Rendah" },
+              ]},
+              { name: "teknisi", label: "Teknisi", type: "select", options: [
+                { value: "Tim Mekanik A", label: "Tim Mekanik A" },
+                { value: "Tim Mekanik B", label: "Tim Mekanik B" },
+                { value: "PT Mitra Servis", label: "PT Mitra Servis (Vendor)" },
+              ]},
+              { name: "tglMulai", label: "Tanggal Mulai", type: "date", required: true },
+              { name: "estimasi", label: "Estimasi Selesai", type: "date" },
+              { name: "masalah", label: "Masalah / Pekerjaan", type: "textarea", span: 2, required: true, placeholder: "Deskripsi masalah atau jenis pekerjaan maintenance" },
+            ]}
+            trigger={<Button size="sm" className="h-8 text-xs gap-1.5 bg-[#0A6ED1] hover:bg-[#0854A1]"><Plus className="w-3.5 h-3.5" />Work Order Baru</Button>}
+          />
+        }
       />
       <div className="p-6 space-y-6">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">

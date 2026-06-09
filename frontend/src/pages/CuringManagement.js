@@ -4,6 +4,7 @@ import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { curingBatches } from "@/data/mockData";
 import { Thermometer, Droplets, Clock, Plus } from "lucide-react";
+import FormDialog from "@/components/shared/FormDialog";
 
 const CuringManagement = () => {
   return (
@@ -14,7 +15,32 @@ const CuringManagement = () => {
         breadcrumbs={["Beranda", "Curing"]}
         testId="curing-page-header"
         actions={
-          <Button size="sm" className="h-8 text-xs gap-1.5 bg-[#0A6ED1] hover:bg-[#0854A1]"><Plus className="w-3.5 h-3.5" />Mulai Batch Baru</Button>
+          <FormDialog
+            testId="curing-create"
+            title="Mulai Batch Curing Baru"
+            description="Mulai proses curing untuk batch produk yang telah selesai casting"
+            submitLabel="Mulai Curing"
+            successMessage="Batch curing berhasil dimulai"
+            fields={[
+              { name: "po", label: "Order Produksi (PO)", type: "select", required: true, options: [
+                { value: "PO-2026-0244", label: "PO-2026-0244 — Barrier NJ" },
+                { value: "PO-2026-0243", label: "PO-2026-0243 — Box Culvert 1500" },
+                { value: "PO-2026-0242", label: "PO-2026-0242 — U-Ditch 800" },
+              ]},
+              { name: "chamber", label: "Steam Chamber", type: "select", required: true, options: [
+                { value: "Curing-A", label: "Chamber A" },
+                { value: "Curing-B", label: "Chamber B" },
+              ]},
+              { name: "qty", label: "Jumlah Unit", type: "number", placeholder: "Mis. 24", required: true },
+              { name: "suhu", label: "Setpoint Suhu (°C)", type: "number", placeholder: "65", required: true },
+              { name: "kelembaban", label: "Setpoint Kelembaban (%)", type: "number", placeholder: "92" },
+              { name: "durasi", label: "Durasi (jam)", type: "number", placeholder: "48" },
+              { name: "catatan", label: "Catatan", type: "textarea", span: 2 },
+            ]}
+            trigger={
+              <Button size="sm" className="h-8 text-xs gap-1.5 bg-[#0A6ED1] hover:bg-[#0854A1]"><Plus className="w-3.5 h-3.5" />Mulai Batch Baru</Button>
+            }
+          />
         }
       />
       <div className="p-6 space-y-6">

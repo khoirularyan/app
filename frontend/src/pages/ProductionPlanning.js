@@ -1,8 +1,12 @@
 import PageHeader from "@/components/shared/PageHeader";
 import StatusBadge from "@/components/shared/StatusBadge";
 import { Button } from "@/components/ui/button";
-import { planningRows } from "@/data/mockData";
+import { planningRows, products, customers } from "@/data/mockData";
 import { ChevronLeft, ChevronRight, Plus, Download } from "lucide-react";
+import { useState } from "react";
+import { toast } from "sonner";
+import FormDialog from "@/components/shared/FormDialog";
+import { showExportToast } from "@/components/shared/FilterPopover";
 
 const days = ["Sen 10", "Sel 11", "Rab 12", "Kam 13", "Jum 14", "Sab 15", "Min 16", "Sen 17"];
 
@@ -14,6 +18,12 @@ const lineColor = {
 };
 
 const ProductionPlanning = () => {
+  const [view, setView] = useState("week");
+  const [weekOffset, setWeekOffset] = useState(0);
+
+  const weekLabels = ["27 Jan — 02 Feb", "03 — 09 Februari 2026", "10 — 16 Februari 2026", "17 — 23 Februari 2026", "24 Feb — 02 Mar"];
+  const weekLabel = weekLabels[Math.max(0, Math.min(4, 2 + weekOffset))];
+
   return (
     <div>
       <PageHeader
@@ -23,8 +33,26 @@ const ProductionPlanning = () => {
         testId="planning-page-header"
         actions={
           <>
-            <Button variant="outline" size="sm" className="h-8 text-xs gap-1.5"><Download className="w-3.5 h-3.5" />Ekspor Jadwal</Button>
-            <Button size="sm" className="h-8 text-xs gap-1.5 bg-[#0A6ED1] hover:bg-[#0854A1]"><Plus className="w-3.5 h-3.5" />Order Baru</Button>
+            <Button variant="outline" size="sm" className="h-8 text-xs gap-1.5" onClick={() => showExportToast("jadwal produksi")}><Download className="w-3.5 h-3.5" />Ekspor Jadwal</Button>
+            <FormDialog
+              testId="planning-create"
+              title="Order Produksi Baru"
+              description="Tambahkan order baru ke jadwal produksi"
+              submitLabel="Jadwalkan Order"
+              successMessage="Order berhasil ditambahkan ke jadwal"
+              fields={[
+                { name: "produk", label: "Produk", type: "select", required: true, options: products.map(p => ({ value: p.kode, label: `${p.kode} — ${p.nama}` })) },
+                { name: "qty", label: "Quantity", type: "number", required: true },
+                { name: "customer", label: "Customer", type: "select", options: customers.map(c => ({ value: c.kode, label: c.nama })) },
+                { name: "line", label: "Line Produksi", type: "select", required: true, options: [
+                  { value: "LINE-A", label: "Line A" }, { value: "LINE-B", label: "Line B" },
+                  { value: "LINE-C", label: "Line C" }, { value: "LINE-D", label: "Line D" },
+                ]},
+                { name: "tglMulai", label: "Tanggal Mulai", type: "date", required: true },
+                { name: "tglSelesai", label: "Target Selesai", type: "date", required: true },
+              ]}
+              trigger={<Button size="sm" className="h-8 text-xs gap-1.5 bg-[#0A6ED1] hover:bg-[#0854A1]"><Plus className="w-3.5 h-3.5" />Order Baru</Button>}
+            />
           </>
         }
       />
@@ -32,14 +60,14 @@ const ProductionPlanning = () => {
         {/* Date controls */}
         <div className="bg-white border border-[#DFE3E8] rounded-md p-3 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" className="h-7 w-7 p-0"><ChevronLeft className="w-3.5 h-3.5" /></Button>
-            <div className="text-sm font-medium text-[#1C252E]">10 — 16 Februari 2026</div>
-            <Button variant="outline" size="sm" className="h-7 w-7 p-0"><ChevronRight className="w-3.5 h-3.5" /></Button>
+            <Button variant="outline" size="sm" className="h-7 w-7 p-0" onClick={() => { setWeekOffset(o => o - 1); toast.info("Minggu sebelumnya"); }} data-testid="planning-prev-week"><ChevronLeft className="w-3.5 h-3.5" /></Button>
+            <div className="text-sm font-medium text-[#1C252E]" data-testid="planning-week-label">{weekLabel}</div>
+            <Button variant="outline" size="sm" className="h-7 w-7 p-0" onClick={() => { setWeekOffset(o => o + 1); toast.info("Minggu berikutnya"); }} data-testid="planning-next-week"><ChevronRight className="w-3.5 h-3.5" /></Button>
           </div>
           <div className="flex items-center gap-1">
-            <Button variant="outline" size="sm" className="h-7 text-xs">Harian</Button>
-            <Button size="sm" className="h-7 text-xs bg-[#0A6ED1] hover:bg-[#0854A1]">Mingguan</Button>
-            <Button variant="outline" size="sm" className="h-7 text-xs">Bulanan</Button>
+            <Button variant={view === "day" ? "default" : "outline"} size="sm" className={`h-7 text-xs ${view === "day" ? "bg-[#0A6ED1] hover:bg-[#0854A1]" : ""}`} onClick={() => { setView("day"); toast.info("Tampilan: Harian"); }} data-testid="planning-view-day">Harian</Button>
+            <Button variant={view === "week" ? "default" : "outline"} size="sm" className={`h-7 text-xs ${view === "week" ? "bg-[#0A6ED1] hover:bg-[#0854A1]" : ""}`} onClick={() => { setView("week"); toast.info("Tampilan: Mingguan"); }} data-testid="planning-view-week">Mingguan</Button>
+            <Button variant={view === "month" ? "default" : "outline"} size="sm" className={`h-7 text-xs ${view === "month" ? "bg-[#0A6ED1] hover:bg-[#0854A1]" : ""}`} onClick={() => { setView("month"); toast.info("Tampilan: Bulanan"); }} data-testid="planning-view-month">Bulanan</Button>
           </div>
         </div>
 
