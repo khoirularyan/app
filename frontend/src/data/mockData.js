@@ -453,16 +453,11 @@ export const deliveryStatuses = [
 ];
 
 export const processDefinitions = [
-  { id: "P01", urutan: 1, nama: "Persiapan Tulangan", icon: "Wrench", warna: "#59687A", deskripsi: "Pemotongan, pembengkokan dan perakitan besi tulangan", durasi: 45, aktif: true },
-  { id: "P02", urutan: 2, nama: "Persiapan Cetakan", icon: "Boxes", warna: "#0070F2", deskripsi: "Pembersihan, pengolesan release agent dan setting tulangan", durasi: 30, aktif: true },
-  { id: "P03", urutan: 3, nama: "Casting", icon: "Droplet", warna: "#0A6ED1", deskripsi: "Pengecoran beton segar ke dalam cetakan dengan vibrasi", durasi: 60, aktif: true },
-  { id: "P04", urutan: 4, nama: "Steam Curing", icon: "Thermometer", warna: "#E9730C", deskripsi: "Perawatan beton dengan uap pada 65-70°C selama 8-12 jam", durasi: 480, aktif: true },
-  { id: "P05", urutan: 5, nama: "Demoulding", icon: "Unlock", warna: "#0070F2", deskripsi: "Pembukaan cetakan setelah beton mencapai kekuatan awal", durasi: 20, aktif: true },
-  { id: "P06", urutan: 6, nama: "Inspeksi Awal", icon: "Search", warna: "#107E3E", deskripsi: "Pengecekan visual dan dimensi setelah demoulding", durasi: 15, aktif: true },
-  { id: "P07", urutan: 7, nama: "Repair / Touch-up", icon: "Hammer", warna: "#E9730C", deskripsi: "Perbaikan cacat ringan permukaan sebelum QC final", durasi: 30, aktif: false },
-  { id: "P08", urutan: 8, nama: "QC Final", icon: "ShieldCheck", warna: "#107E3E", deskripsi: "Inspeksi mutu lengkap termasuk uji kuat tekan", durasi: 25, aktif: true },
-  { id: "P09", urutan: 9, nama: "Marking & Labeling", icon: "Tag", warna: "#59687A", deskripsi: "Pemberian kode batch, tanggal produksi dan QR code", durasi: 10, aktif: true },
-  { id: "P10", urutan: 10, nama: "Finished Goods", icon: "Package", warna: "#107E3E", deskripsi: "Pemindahan ke gudang produk jadi", durasi: 15, aktif: true },
+  { id: "P01", urutan: 1, nama: "Batching", icon: "Droplet", warna: "#0A6ED1", deskripsi: "Penakaran semen, agregat, air, dan admixture sesuai mix design", durasi: 30, aktif: true },
+  { id: "P02", urutan: 2, nama: "Casting", icon: "Hammer", warna: "#0070F2", deskripsi: "Pengecoran beton segar ke dalam cetakan dengan vibrasi pemadatan", durasi: 60, aktif: true },
+  { id: "P03", urutan: 3, nama: "Curing", icon: "Thermometer", warna: "#E9730C", deskripsi: "Perawatan beton dengan uap pada 65-70°C selama 8-12 jam", durasi: 480, aktif: true },
+  { id: "P04", urutan: 4, nama: "Finishing", icon: "ShieldCheck", warna: "#107E3E", deskripsi: "Demoulding, repair, QC final, dan marking sebelum masuk gudang", durasi: 30, aktif: true },
+  { id: "P05", urutan: 5, nama: "Storage", icon: "Package", warna: "#59687A", deskripsi: "Pemindahan ke gudang produk jadi dan pencatatan stok", durasi: 15, aktif: true },
 ];
 
 export const businessFlow = [

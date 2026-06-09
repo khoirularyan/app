@@ -5,7 +5,7 @@ import { Progress } from "@/components/ui/progress";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter,
 } from "@/components/ui/dialog";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { productionOrders, productionLines, productionStatuses, processDefinitions } from "@/data/mockData";
 import { ArrowRight, Pencil, ArrowUpRight, Clock } from "lucide-react";
 import { ProcessIcon } from "@/components/visuals/ProcessIcons";
@@ -22,127 +22,124 @@ const stages = [
 // Stage choices derived from configurable production statuses (Master Data).
 const stageOptions = productionStatuses.filter((s) => s.aktif && s.status !== "Direncanakan");
 
-const StageEditDialog = ({ open, onOpenChange, order, onSave }) => {
-  const [newStage, setNewStage] = useState("");
-  const [progress, setProgress] = useState(0);
+const StageEditBody = ({ order, onSave, onCancel }) => {
+  const [newStage, setNewStage] = useState(order.status);
+  const [progress, setProgress] = useState(order.progress);
   const [note, setNote] = useState("");
 
-  useEffect(() => {
-    if (open && order) {
-      setNewStage(order.status);
-      setProgress(order.progress);
-      setNote("");
-    }
-  }, [open, order]);
-
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-lg p-0 overflow-hidden" data-testid="stage-edit-dialog">
-        <div className="px-6 py-4 bg-gradient-to-r from-[#0A6ED1] to-[#0854A1] text-white">
-          <DialogHeader>
-            <div className="text-[10px] uppercase tracking-[0.2em] text-white/75 font-semibold">Edit Tahap Produksi</div>
-            <DialogTitle className="text-base font-display text-white">{order?.no}</DialogTitle>
-            <DialogDescription className="text-xs text-white/85">
-              {order?.produk} · {order?.qty} unit · Line {order?.line}
-            </DialogDescription>
-          </DialogHeader>
-        </div>
+    <>
+      <div className="px-6 py-4 bg-gradient-to-r from-[#0A6ED1] to-[#0854A1] text-white">
+        <DialogHeader>
+          <div className="text-[10px] uppercase tracking-[0.2em] text-white/75 font-semibold">Edit Tahap Produksi</div>
+          <DialogTitle className="text-base font-display text-white">{order.no}</DialogTitle>
+          <DialogDescription className="text-xs text-white/85">
+            {order.produk} · {order.qty} unit · Line {order.line}
+          </DialogDescription>
+        </DialogHeader>
+      </div>
 
-        <div className="p-6 space-y-4">
-          {/* Current */}
-          <div className="grid grid-cols-2 gap-3">
-            <div className="bg-[#F8FAFC] border border-[#DFE3E8] rounded p-3">
-              <div className="text-[10px] uppercase tracking-wider text-[#59687A] font-semibold">Tahap Saat Ini</div>
-              <div className="mt-1.5"><StatusBadge status={order?.status || ""} /></div>
-            </div>
-            <div className="bg-[#F8FAFC] border border-[#DFE3E8] rounded p-3">
-              <div className="text-[10px] uppercase tracking-wider text-[#59687A] font-semibold">Progress Sekarang</div>
-              <div className="text-xl font-semibold font-mono-num text-[#1C252E] mt-1">{order?.progress}%</div>
-            </div>
+      <div className="p-6 space-y-4">
+        <div className="grid grid-cols-2 gap-3">
+          <div className="bg-[#F8FAFC] border border-[#DFE3E8] rounded p-3">
+            <div className="text-[10px] uppercase tracking-wider text-[#59687A] font-semibold">Tahap Saat Ini</div>
+            <div className="mt-1.5"><StatusBadge status={order.status} /></div>
           </div>
-
-          {/* New stage picker */}
-          <div>
-            <label className="text-[11px] uppercase tracking-wider text-[#59687A] font-semibold">Pilih Tahap Baru</label>
-            <div className="grid grid-cols-2 gap-2 mt-2" data-testid="stage-picker">
-              {stageOptions.map((s) => {
-                const selected = newStage === s.status;
-                return (
-                  <button
-                    key={s.kode}
-                    data-testid={`stage-option-${s.status.replace(/\s/g, "-")}`}
-                    onClick={() => setNewStage(s.status)}
-                    className={`text-left p-2.5 rounded border transition-all ${
-                      selected ? "border-[#0A6ED1] bg-[#E5F0FA]" : "border-[#DFE3E8] hover:border-[#0A6ED1]"
-                    }`}
-                  >
-                    <div className="flex items-center gap-2">
-                      <span className="w-2 h-2 rounded-full" style={{ backgroundColor: s.warna }} />
-                      <span className="text-xs font-semibold text-[#1C252E]">{s.status}</span>
-                    </div>
-                    <div className="text-[10px] text-[#59687A] mt-0.5 line-clamp-1">{s.deskripsi}</div>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Progress slider */}
-          <div>
-            <div className="flex items-center justify-between">
-              <label className="text-[11px] uppercase tracking-wider text-[#59687A] font-semibold">Progress (%)</label>
-              <span className="text-sm font-mono-num font-semibold text-[#0A6ED1]" data-testid="stage-progress-value">{progress}%</span>
-            </div>
-            <input
-              type="range"
-              min={0} max={100} step={1}
-              value={progress}
-              onChange={(e) => setProgress(Number(e.target.value))}
-              className="w-full mt-2 accent-[#0A6ED1]"
-              data-testid="stage-progress-slider"
-            />
-            <div className="flex items-center justify-between text-[10px] text-[#59687A] font-mono-num mt-1">
-              <span>0%</span><span>50%</span><span>100%</span>
-            </div>
-          </div>
-
-          {/* Note */}
-          <div>
-            <label className="text-[11px] uppercase tracking-wider text-[#59687A] font-semibold">Catatan Operator (opsional)</label>
-            <input
-              type="text"
-              value={note}
-              onChange={(e) => setNote(e.target.value)}
-              placeholder="Mis. Selesai casting, masuk chamber B"
-              data-testid="stage-note-input"
-              className="w-full mt-1 h-9 px-2.5 text-sm border border-[#DFE3E8] rounded focus:outline-none focus:ring-2 focus:ring-[#0A6ED1]/30 focus:border-[#0A6ED1]"
-            />
-          </div>
-
-          {/* Stage definitions reference */}
-          <div className="text-[10px] text-[#59687A] flex items-center gap-1.5 border-t border-[#EEF0F2] pt-2">
-            <Clock className="w-3 h-3" />
-            Tahap dapat dikonfigurasi lewat <a href="/master-process" className="text-[#0A6ED1] hover:underline">Master Proses</a> ({processDefinitions.filter((p) => p.aktif).length} tahap aktif)
+          <div className="bg-[#F8FAFC] border border-[#DFE3E8] rounded p-3">
+            <div className="text-[10px] uppercase tracking-wider text-[#59687A] font-semibold">Progress Sekarang</div>
+            <div className="text-xl font-semibold font-mono-num text-[#1C252E] mt-1">{order.progress}%</div>
           </div>
         </div>
 
-        <DialogFooter className="px-6 py-3 bg-[#F8FAFC] border-t border-[#EEF0F2]">
-          <Button variant="outline" size="sm" onClick={() => onOpenChange(false)} data-testid="stage-edit-cancel">Batal</Button>
-          <Button
-            size="sm" className="bg-[#0A6ED1] hover:bg-[#0854A1]"
-            data-testid="stage-edit-save"
-            onClick={() => {
-              onSave({ status: newStage, progress, note });
-              onOpenChange(false);
-            }}
-          >
-            Simpan Perubahan
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+        <div>
+          <label className="text-[11px] uppercase tracking-wider text-[#59687A] font-semibold">Pilih Tahap Baru</label>
+          <div className="grid grid-cols-2 gap-2 mt-2" data-testid="stage-picker">
+            {stageOptions.map((s) => {
+              const selected = newStage === s.status;
+              return (
+                <button
+                  key={s.kode}
+                  data-testid={`stage-option-${s.status.replace(/\s/g, "-")}`}
+                  onClick={() => setNewStage(s.status)}
+                  className={`text-left p-2.5 rounded border transition-all ${
+                    selected ? "border-[#0A6ED1] bg-[#E5F0FA]" : "border-[#DFE3E8] hover:border-[#0A6ED1]"
+                  }`}
+                >
+                  <div className="flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full" style={{ backgroundColor: s.warna }} />
+                    <span className="text-xs font-semibold text-[#1C252E]">{s.status}</span>
+                  </div>
+                  <div className="text-[10px] text-[#59687A] mt-0.5 line-clamp-1">{s.deskripsi}</div>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        <div>
+          <div className="flex items-center justify-between">
+            <label className="text-[11px] uppercase tracking-wider text-[#59687A] font-semibold">Progress (%)</label>
+            <span className="text-sm font-mono-num font-semibold text-[#0A6ED1]" data-testid="stage-progress-value">{progress}%</span>
+          </div>
+          <input
+            type="range"
+            min={0} max={100} step={1}
+            value={progress}
+            onChange={(e) => setProgress(Number(e.target.value))}
+            className="w-full mt-2 accent-[#0A6ED1]"
+            data-testid="stage-progress-slider"
+          />
+          <div className="flex items-center justify-between text-[10px] text-[#59687A] font-mono-num mt-1">
+            <span>0%</span><span>50%</span><span>100%</span>
+          </div>
+        </div>
+
+        <div>
+          <label className="text-[11px] uppercase tracking-wider text-[#59687A] font-semibold">Catatan Operator (opsional)</label>
+          <input
+            type="text"
+            value={note}
+            onChange={(e) => setNote(e.target.value)}
+            placeholder="Mis. Selesai casting, masuk chamber B"
+            data-testid="stage-note-input"
+            className="w-full mt-1 h-9 px-2.5 text-sm border border-[#DFE3E8] rounded focus:outline-none focus:ring-2 focus:ring-[#0A6ED1]/30 focus:border-[#0A6ED1]"
+          />
+        </div>
+
+        <div className="text-[10px] text-[#59687A] flex items-center gap-1.5 border-t border-[#EEF0F2] pt-2">
+          <Clock className="w-3 h-3" />
+          Tahap dapat dikonfigurasi lewat <a href="/master-process" className="text-[#0A6ED1] hover:underline">Master Proses</a> ({processDefinitions.filter((p) => p.aktif).length} tahap aktif)
+        </div>
+      </div>
+
+      <DialogFooter className="px-6 py-3 bg-[#F8FAFC] border-t border-[#EEF0F2]">
+        <Button variant="outline" size="sm" onClick={onCancel} data-testid="stage-edit-cancel">Batal</Button>
+        <Button
+          size="sm" className="bg-[#0A6ED1] hover:bg-[#0854A1]"
+          data-testid="stage-edit-save"
+          onClick={() => onSave({ status: newStage, progress, note })}
+        >
+          Simpan Perubahan
+        </Button>
+      </DialogFooter>
+    </>
   );
 };
+
+const StageEditDialog = ({ open, onOpenChange, order, onSave }) => (
+  <Dialog open={open} onOpenChange={onOpenChange}>
+    <DialogContent className="max-w-lg p-0 overflow-hidden" data-testid="stage-edit-dialog">
+      {order && (
+        <StageEditBody
+          key={order.no}
+          order={order}
+          onSave={(data) => { onSave(data); onOpenChange(false); }}
+          onCancel={() => onOpenChange(false)}
+        />
+      )}
+    </DialogContent>
+  </Dialog>
+);
 
 const ProductionExecution = () => {
   const [orders, setOrders] = useState(productionOrders);
