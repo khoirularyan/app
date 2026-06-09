@@ -233,28 +233,28 @@ export const shifts = [
 
 // ===== PRODUCTION ORDERS =====
 export const productionOrders = [
-  { no: "PO-2026-0244", produk: "Barrier Beton NJ", qty: 60, line: "LINE-D", customer: "PT Hutama Karya", tglMulai: "2026-02-14", tglSelesai: "2026-02-20", progress: 5, status: "Direncanakan", prioritas: "Tinggi" },
-  { no: "PO-2026-0243", produk: "Box Culvert 1500", qty: 24, line: "LINE-C", customer: "Dinas PU Surabaya", tglMulai: "2026-02-13", tglSelesai: "2026-02-19", progress: 35, status: "Casting", prioritas: "Tinggi" },
-  { no: "PO-2026-0242", produk: "U-Ditch 800", qty: 48, line: "LINE-B", customer: "PT Wijaya Karya", tglMulai: "2026-02-12", tglSelesai: "2026-02-18", progress: 60, status: "Curing", prioritas: "Sedang" },
-  { no: "PO-2026-0241", produk: "U-Ditch 500", qty: 80, line: "LINE-B", customer: "PT Adhi Karya", tglMulai: "2026-02-11", tglSelesai: "2026-02-17", progress: 78, status: "Curing", prioritas: "Tinggi" },
-  { no: "PO-2026-0240", produk: "U-Ditch 300", qty: 120, line: "LINE-B", customer: "PT PP", tglMulai: "2026-02-10", tglSelesai: "2026-02-15", progress: 92, status: "QC", prioritas: "Sedang" },
-  { no: "PO-2026-0239", produk: "Pipa RC Ø1000", qty: 16, line: "LINE-A", customer: "PT Brantas Abipraya", tglMulai: "2026-02-10", tglSelesai: "2026-02-16", progress: 70, status: "Curing", prioritas: "Tinggi" },
-  { no: "PO-2026-0238", produk: "Box Culvert 800", qty: 32, line: "LINE-C", customer: "PT Jasamarga", tglMulai: "2026-02-09", tglSelesai: "2026-02-15", progress: 85, status: "Demoulding", prioritas: "Sedang" },
-  { no: "PO-2026-0237", produk: "Pipa RC Ø600", qty: 48, line: "LINE-A", customer: "Dinas PU Surabaya", tglMulai: "2026-02-08", tglSelesai: "2026-02-14", progress: 100, status: "Selesai", prioritas: "Sedang" },
-  { no: "PO-2026-0236", produk: "Cover U-Ditch 500", qty: 96, line: "LINE-B", customer: "PT Wijaya Karya", tglMulai: "2026-02-07", tglSelesai: "2026-02-13", progress: 100, status: "Selesai", prioritas: "Rendah" },
-  { no: "PO-2026-0235", produk: "Pipa RC Ø600", qty: 24, line: "LINE-A", customer: "CV Bumi Persada", tglMulai: "2026-02-06", tglSelesai: "2026-02-12", progress: 100, status: "Selesai", prioritas: "Rendah" },
+  { no: "PO-2026-0244", produk: "Barrier Beton NJ", qty: 60, line: "LINE-D", customer: "PT Hutama Karya", tglMulai: "2026-02-14", tglSelesai: "2026-02-20", progress: 5, status: "Direncanakan", prioritas: "Tinggi", executed: 0 },
+  { no: "PO-2026-0243", produk: "Box Culvert 1500", qty: 24, line: "LINE-C", customer: "Dinas PU Surabaya", tglMulai: "2026-02-13", tglSelesai: "2026-02-19", progress: 35, status: "Casting", prioritas: "Tinggi", executed: 0 },
+  { no: "PO-2026-0242", produk: "U-Ditch 800", qty: 48, line: "LINE-B", customer: "PT Wijaya Karya", tglMulai: "2026-02-12", tglSelesai: "2026-02-18", progress: 60, status: "Curing", prioritas: "Sedang", executed: 0 },
+  { no: "PO-2026-0241", produk: "U-Ditch 500", qty: 80, line: "LINE-B", customer: "PT Adhi Karya", tglMulai: "2026-02-11", tglSelesai: "2026-02-17", progress: 78, status: "Curing", prioritas: "Tinggi", executed: 0 },
+  { no: "PO-2026-0240", produk: "U-Ditch 300", qty: 120, line: "LINE-B", customer: "PT PP", tglMulai: "2026-02-10", tglSelesai: "2026-02-15", progress: 92, status: "QC", prioritas: "Sedang", executed: 0 },
+  { no: "PO-2026-0239", produk: "Pipa RC Ø1000", qty: 16, line: "LINE-A", customer: "PT Brantas Abipraya", tglMulai: "2026-02-10", tglSelesai: "2026-02-16", progress: 70, status: "Curing", prioritas: "Tinggi", executed: 0 },
+  { no: "PO-2026-0238", produk: "Box Culvert 800", qty: 32, line: "LINE-C", customer: "PT Jasamarga", tglMulai: "2026-02-09", tglSelesai: "2026-02-15", progress: 85, status: "Demoulding", prioritas: "Sedang", executed: 0 },
+  { no: "PO-2026-0237", produk: "Pipa RC Ø600", qty: 48, line: "LINE-A", customer: "Dinas PU Surabaya", tglMulai: "2026-02-08", tglSelesai: "2026-02-14", progress: 100, status: "Selesai", prioritas: "Sedang", executed: 0 },
+  { no: "PO-2026-0236", produk: "Cover U-Ditch 500", qty: 96, line: "LINE-B", customer: "PT Wijaya Karya", tglMulai: "2026-02-07", tglSelesai: "2026-02-13", progress: 100, status: "Selesai", prioritas: "Rendah", executed: 0 },
+  { no: "PO-2026-0235", produk: "Pipa RC Ø600", qty: 24, line: "LINE-A", customer: "CV Bumi Persada", tglMulai: "2026-02-06", tglSelesai: "2026-02-12", progress: 100, status: "Selesai", prioritas: "Rendah", executed: 0 },
 ];
 
 // ===== PLANNING (Gantt-like) =====
 export const planningRows = [
-  { no: "PO-2026-0240", produk: "U-Ditch 300", line: "LINE-B", start: 0, duration: 5, status: "Selesai" },
-  { no: "PO-2026-0241", produk: "U-Ditch 500", line: "LINE-B", start: 1, duration: 6, status: "Progress" },
-  { no: "PO-2026-0242", produk: "U-Ditch 800", line: "LINE-B", start: 2, duration: 6, status: "Progress" },
-  { no: "PO-2026-0238", produk: "Box Culvert 800", line: "LINE-C", start: 0, duration: 6, status: "Progress" },
-  { no: "PO-2026-0243", produk: "Box Culvert 1500", line: "LINE-C", start: 3, duration: 6, status: "Progress" },
-  { no: "PO-2026-0239", produk: "Pipa RC Ø1000", line: "LINE-A", start: 0, duration: 6, status: "Progress" },
-  { no: "PO-2026-0237", produk: "Pipa RC Ø600", line: "LINE-A", start: 2, duration: 6, status: "Selesai" },
-  { no: "PO-2026-0244", produk: "Barrier NJ", line: "LINE-D", start: 4, duration: 6, status: "Direncanakan" },
+  { no: "PO-2026-0240", produk: "U-Ditch 300", batch: "BATCH-B", start: 0, duration: 5, status: "Selesai" },
+  { no: "PO-2026-0241", produk: "U-Ditch 500", batch: "BATCH-B", start: 1, duration: 6, status: "Progress" },
+  { no: "PO-2026-0242", produk: "U-Ditch 800", batch: "BATCH-B", start: 2, duration: 6, status: "Progress" },
+  { no: "PO-2026-0238", produk: "Box Culvert 800", batch: "BATCH-C", start: 0, duration: 6, status: "Progress" },
+  { no: "PO-2026-0243", produk: "Box Culvert 1500", batch: "BATCH-C", start: 3, duration: 6, status: "Progress" },
+  { no: "PO-2026-0239", produk: "Pipa RC Ø1000", batch: "BATCH-A", start: 0, duration: 6, status: "Progress" },
+  { no: "PO-2026-0237", produk: "Pipa RC Ø600", batch: "BATCH-A", start: 2, duration: 6, status: "Selesai" },
+  { no: "PO-2026-0244", produk: "Barrier NJ", batch: "BATCH-D", start: 4, duration: 6, status: "Direncanakan" },
 ];
 
 // ===== CURING =====
@@ -394,16 +394,12 @@ export const navigationItems = [
   { id: "dashboard", label: "Dashboard", icon: "LayoutDashboard", path: "/" },
   { id: "master-data", label: "Master Data", icon: "Database", path: "/master-data" },
   { id: "master-bom", label: "Master BOM", icon: "Package", path: "/master-bom" },
+  { id: "sales", label: "Sales", icon: "ShoppingBag", path: "/sales" },
   { id: "planning", label: "Perencanaan Produksi", icon: "CalendarRange", path: "/planning" },
-  { id: "production-orders", label: "Order Produksi", icon: "ClipboardList", path: "/production-orders" },
-  { id: "production-execution", label: "Eksekusi Produksi", icon: "Factory", path: "/production-execution" },
-  { id: "inventory", label: "Persediaan", icon: "Package", path: "/inventory" },
-  { id: "sales", label: "Order Penjualan", icon: "ShoppingCart", path: "/sales" },
-  { id: "delivery", label: "Pengiriman", icon: "Truck", path: "/delivery" },
-  { id: "purchasing", label: "Pembelian", icon: "ShoppingBag", path: "/purchasing" },
-  { id: "maintenance", label: "Pemeliharaan", icon: "Wrench", path: "/maintenance" },
-  { id: "curing", label: "Curing", icon: "Thermometer", path: "/curing" },
+  { id: "execution", label: "Eksekusi Produksi", icon: "PlayCircle", path: "/production-execution" },
   { id: "quality", label: "Quality Control", icon: "ShieldCheck", path: "/quality" },
+  { id: "inventory", label: "Persediaan", icon: "Package", path: "/inventory" },
+  { id: "delivery", label: "Pengiriman", icon: "Truck", path: "/delivery" },
   { id: "reports", label: "Laporan", icon: "FileBarChart", path: "/reports" },
 ];
 

@@ -1,168 +1,214 @@
 import PageHeader from "@/components/shared/PageHeader";
 import StatusBadge from "@/components/shared/StatusBadge";
+import KPICard from "@/components/shared/KPICard";
+import FormDialog from "@/components/shared/FormDialog";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { planningRows, products, customers } from "@/data/mockData";
+import { planningRows, productionOrders, productionLines, curingBatches } from "@/data/mockData";
+import { Calendar } from "@/components/ui/calendar";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
 import { ChevronLeft, ChevronRight, Plus, Download, CalendarRange, Factory } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
-import FormDialog from "@/components/shared/FormDialog";
-import { showExportToast } from "@/components/shared/FilterPopover";
-import IsometricPlantFloor from "@/components/visuals/IsometricPlantFloor";
-
-const days = ["Sen 10", "Sel 11", "Rab 12", "Kam 13", "Jum 14", "Sab 15", "Min 16", "Sen 17"];
-
-const lineColor = {
-  "LINE-A": "#0A6ED1",
-  "LINE-B": "#107E3E",
-  "LINE-C": "#E9730C",
-  "LINE-D": "#59687A",
-};
 
 const ProductionPlanning = () => {
-  const [view, setView] = useState("week");
-  const [weekOffset, setWeekOffset] = useState(0);
+  const [calendarMonth, setCalendarMonth] = useState(new Date(2026, 5, 9));
 
-  const weekLabels = ["27 Jan — 02 Feb", "03 — 09 Februari 2026", "10 — 16 Februari 2026", "17 — 23 Februari 2026", "24 Feb — 02 Mar"];
-  const weekLabel = weekLabels[Math.max(0, Math.min(4, 2 + weekOffset))];
+  // quick KPI calculations
+  const totalPlanned = productionOrders.reduce((s, o) => s + (o.qty || 0), 0);
+  const totalActive = productionOrders.filter((o) => o.status !== "Selesai").length;
+  const plannedThisWeek = planningRows.length;
+  const utilization = 93.4; // placeholder
+
+  // compute resource capacity data aggregated by batch
+  const batches = Array.from(new Set((planningRows || []).map((r) => r.batch))).filter(Boolean);
+  const capacityData = batches.map((b) => {
+    const poNos = (planningRows || []).filter((r) => r.batch === b).map((r) => r.no);
+    const orders = productionOrders.filter((o) => poNos.includes(o.no));
+    const planned = orders.reduce((s, o) => s + (o.qty || 0), 0);
+    const actual = orders.reduce((s, o) => s + ((o.qty || 0) * ((o.progress || 0) / 100)), 0);
+    return { batch: b, planned, actual: Math.round(actual) };
+  });
 
   return (
     <div>
       <PageHeader
-        title="Perencanaan Produksi"
-        subtitle="Penjadwalan order produksi per line — Minggu 7, Februari 2026"
+        title="Production Planning"
+        subtitle="Strategic optimization and scheduling for operations"
         breadcrumbs={["Beranda", "Perencanaan Produksi"]}
         testId="planning-page-header"
         actions={
-          <>
-            <Button variant="outline" size="sm" className="h-8 text-xs gap-1.5" onClick={() => showExportToast("jadwal produksi")}><Download className="w-3.5 h-3.5" />Ekspor Jadwal</Button>
-            <FormDialog
-              testId="planning-create"
-              title="Order Produksi Baru"
-              description="Tambahkan order baru ke jadwal produksi"
-              submitLabel="Jadwalkan Order"
-              successMessage="Order berhasil ditambahkan ke jadwal"
-              fields={[
-                { name: "produk", label: "Produk", type: "select", required: true, options: products.map(p => ({ value: p.kode, label: `${p.kode} — ${p.nama}` })) },
-                { name: "qty", label: "Quantity", type: "number", required: true },
-                { name: "customer", label: "Customer", type: "select", options: customers.map(c => ({ value: c.kode, label: c.nama })) },
-                { name: "line", label: "Line Produksi", type: "select", required: true, options: [
-                  { value: "LINE-A", label: "Line A" }, { value: "LINE-B", label: "Line B" },
-                  { value: "LINE-C", label: "Line C" }, { value: "LINE-D", label: "Line D" },
-                ]},
-                { name: "tglMulai", label: "Tanggal Mulai", type: "date", required: true },
-                { name: "tglSelesai", label: "Target Selesai", type: "date", required: true },
-              ]}
-              trigger={<Button size="sm" className="h-8 text-xs gap-1.5 bg-[#0A6ED1] hover:bg-[#0854A1]"><Plus className="w-3.5 h-3.5" />Order Baru</Button>}
-            />
-          </>
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="sm">
+              <Download className="w-3.5 h-3.5" />Export Report
+            </Button>
+            <Button size="sm" className="bg-[#0A6ED1] hover:bg-[#0854A1]">
+              <Plus className="w-3.5 h-3.5" /> New Schedule
+            </Button>
+          </div>
         }
       />
-      <div className="p-6 space-y-4">
-        <Tabs defaultValue="gantt">
-          <TabsList className="bg-[#F4F6F8] border border-[#DFE3E8] h-9 p-0.5">
-            <TabsTrigger value="gantt" className="text-xs h-8 gap-1.5 data-[state=active]:bg-white" data-testid="planning-tab-gantt">
-              <CalendarRange className="w-3.5 h-3.5" /> Jadwal Gantt
-            </TabsTrigger>
-            <TabsTrigger value="floor" className="text-xs h-8 gap-1.5 data-[state=active]:bg-white" data-testid="planning-tab-floor">
-              <Factory className="w-3.5 h-3.5" /> Plant Floor — Digital Twin
-            </TabsTrigger>
-          </TabsList>
 
-          <TabsContent value="gantt" className="mt-4 space-y-4">
-        {/* Date controls */}
-        <div className="bg-white border border-[#DFE3E8] rounded-md p-3 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" className="h-7 w-7 p-0" onClick={() => { setWeekOffset(o => o - 1); toast.info("Minggu sebelumnya"); }} data-testid="planning-prev-week"><ChevronLeft className="w-3.5 h-3.5" /></Button>
-            <div className="text-sm font-medium text-[#1C252E]" data-testid="planning-week-label">{weekLabel}</div>
-            <Button variant="outline" size="sm" className="h-7 w-7 p-0" onClick={() => { setWeekOffset(o => o + 1); toast.info("Minggu berikutnya"); }} data-testid="planning-next-week"><ChevronRight className="w-3.5 h-3.5" /></Button>
-          </div>
-          <div className="flex items-center gap-1">
-            <Button variant={view === "day" ? "default" : "outline"} size="sm" className={`h-7 text-xs ${view === "day" ? "bg-[#0A6ED1] hover:bg-[#0854A1]" : ""}`} onClick={() => { setView("day"); toast.info("Tampilan: Harian"); }} data-testid="planning-view-day">Harian</Button>
-            <Button variant={view === "week" ? "default" : "outline"} size="sm" className={`h-7 text-xs ${view === "week" ? "bg-[#0A6ED1] hover:bg-[#0854A1]" : ""}`} onClick={() => { setView("week"); toast.info("Tampilan: Mingguan"); }} data-testid="planning-view-week">Mingguan</Button>
-            <Button variant={view === "month" ? "default" : "outline"} size="sm" className={`h-7 text-xs ${view === "month" ? "bg-[#0A6ED1] hover:bg-[#0854A1]" : ""}`} onClick={() => { setView("month"); toast.info("Tampilan: Bulanan"); }} data-testid="planning-view-month">Bulanan</Button>
-          </div>
+      <div className="p-6 space-y-6">
+        {/* KPI Row */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <KPICard label="Monthly Target" value={`12,500 m³`} unit="" icon={undefined} accent="default" />
+          <KPICard label="Available Capacity" value={`15,200 Hrs`} unit="" icon={undefined} accent="default" />
+          <KPICard label="Planned Capacity" value={`14,080 Hrs`} unit="" icon={undefined} accent="default" />
+          <KPICard label="Utilization %" value={`${utilization}%`} unit="" icon={undefined} accent="warning" />
         </div>
 
-        {/* Gantt */}
-        <div className="bg-white border border-[#DFE3E8] rounded-md overflow-x-auto" data-testid="gantt-chart">
-          <div className="min-w-[900px]">
-            {/* Header */}
-            <div className="grid grid-cols-[280px_repeat(8,1fr)] border-b border-[#DFE3E8] bg-[#F4F6F8]">
-              <div className="px-4 py-2 text-[10px] uppercase tracking-wider text-[#59687A] font-semibold border-r border-[#DFE3E8]">Order / Line</div>
-              {days.map((d, i) => (
-                <div key={i} className="px-2 py-2 text-[10px] uppercase tracking-wider text-[#59687A] font-semibold text-center border-r border-[#DFE3E8] last:border-r-0">{d}</div>
-              ))}
+        {/* Calendar + Capacity */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+          <div className="col-span-1 bg-white border border-[#DFE3E8] rounded-md p-4 flex flex-col min-h-[430px]">
+            <div>
+              <div className="text-sm font-semibold text-[#1C252E]">Calendar</div>
+              <div className="mt-3 text-xs text-[#59687A]">{calendarMonth.toLocaleDateString("en-US", { month: "long", year: "numeric" })}</div>
             </div>
-            {/* Rows */}
-            {planningRows.map((row, i) => (
-              <div key={i} data-testid={`gantt-row-${i}`} className="grid grid-cols-[280px_repeat(8,1fr)] border-b border-[#EEF0F2] hover:bg-[#F8FAFC]">
-                <div className="px-4 py-3 border-r border-[#DFE3E8]">
-                  <div className="text-xs font-mono-num text-[#0A6ED1] font-medium">{row.no}</div>
-                  <div className="text-[13px] text-[#1C252E] truncate">{row.produk}</div>
-                  <div className="text-[10px] text-[#59687A]">{row.line}</div>
-                </div>
-                <div className="relative col-span-8 h-14">
-                  <div className="absolute inset-0 grid grid-cols-8">
-                    {Array.from({ length: 8 }).map((_, k) => (
-                      <div key={k} className="border-r border-[#EEF0F2] last:border-r-0" />
-                    ))}
-                  </div>
-                  <div
-                    className="absolute top-3 h-8 rounded text-white text-[11px] px-2 flex items-center font-medium shadow-sm"
-                    style={{
-                      left: `${(row.start / 8) * 100}%`,
-                      width: `${(row.duration / 8) * 100}%`,
-                      backgroundColor: lineColor[row.line] || "#0A6ED1",
-                      opacity: row.status === "Selesai" ? 0.6 : 1,
-                    }}
-                  >
-                    <span className="truncate">{row.no}</span>
-                  </div>
-                </div>
+            <div className="mt-4 flex-1 min-h-[280px] overflow-hidden rounded-md border border-[#EEF0F2]">
+              <Calendar className="h-full" month={calendarMonth} onMonthChange={setCalendarMonth} />
+            </div>
+
+            <div className="mt-4">
+              <div className="text-xs font-semibold text-[#1C252E]">Upcoming Events</div>
+              <div className="mt-3 space-y-3 max-h-[140px] overflow-y-auto pr-1">
+                {curingBatches.slice(0, 3).map((c) => {
+                  const time = c.mulai ? c.mulai.split(" ")[1] : "--:--";
+                  const date = c.mulai ? c.mulai.split(" ")[0] : "-";
+                  return (
+                    <div key={c.batch} className="flex items-start gap-3">
+                      <div className="w-2 h-2 rounded-full bg-[#0A6ED1] mt-1" />
+                      <div>
+                        <div className="text-sm font-medium">{c.produk}</div>
+                        <div className="text-xs text-[#59687A]">{date} • {time} — {c.chamber}</div>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Legend */}
-        <div className="flex items-center gap-4 px-2">
-          {Object.entries(lineColor).map(([k, v]) => (
-            <div key={k} className="flex items-center gap-1.5 text-xs text-[#59687A]">
-              <span className="w-3 h-3 rounded" style={{ backgroundColor: v }} />
-              {k}
             </div>
-          ))}
+          </div>
+
+          <div className="lg:col-span-2 bg-white border border-[#DFE3E8] rounded-md p-4 flex flex-col min-h-[430px]">
+            <div className="flex items-center justify-between">
+              <div className="text-sm font-semibold text-[#1C252E]">Resource Capacity Planning</div>
+              <div className="text-xs text-[#59687A]">Forecast vs Actual load per facility</div>
+            </div>
+            <div className="mt-4 flex-1 rounded-md">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={capacityData} margin={{ left: -20 }}>
+                  <CartesianGrid stroke="#EEF0F2" vertical={false} />
+                  <XAxis dataKey="batch" tick={{ fontSize: 11, fill: "#59687A" }} />
+                  <YAxis tick={{ fontSize: 11, fill: "#59687A" }} />
+                  <Tooltip />
+                  <Legend wrapperStyle={{ fontSize: 11 }} />
+                  <Bar dataKey="planned" name="Planned" fill="#0A6ED1" />
+                  <Bar dataKey="actual" name="Actual" fill="#9CA3AF" />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
         </div>
 
-        {/* Summary */}
-        <div className="grid grid-cols-4 gap-3">
-          <div className="bg-white border border-[#DFE3E8] rounded-md p-4">
-            <div className="text-[11px] uppercase tracking-wider text-[#59687A] font-semibold">Total Order Aktif</div>
-            <div className="text-2xl font-semibold text-[#1C252E] font-mono-num mt-1">8</div>
+        {/* Active Production Schedule */}
+        <div className="bg-white border border-[#DFE3E8] rounded-md overflow-hidden">
+          <div className="px-4 py-3 border-b border-[#DFE3E8] flex items-center justify-between">
+            <div>
+              <div className="text-base font-semibold text-[#1C252E]">Active Production Schedule</div>
+              <div className="text-xs text-[#59687A]">List of active schedules and their status</div>
+            </div>
+            <div className="text-xs text-[#59687A]">All Plants</div>
           </div>
-          <div className="bg-white border border-[#DFE3E8] rounded-md p-4">
-            <div className="text-[11px] uppercase tracking-wider text-[#59687A] font-semibold">Sedang Berjalan</div>
-            <div className="text-2xl font-semibold text-[#0A6ED1] font-mono-num mt-1">5</div>
-          </div>
-          <div className="bg-white border border-[#DFE3E8] rounded-md p-4">
-            <div className="text-[11px] uppercase tracking-wider text-[#59687A] font-semibold">Direncanakan</div>
-            <div className="text-2xl font-semibold text-[#E9730C] font-mono-num mt-1">2</div>
-          </div>
-          <div className="bg-white border border-[#DFE3E8] rounded-md p-4">
-            <div className="text-[11px] uppercase tracking-wider text-[#59687A] font-semibold">Selesai Minggu Ini</div>
-            <div className="text-2xl font-semibold text-[#107E3E] font-mono-num mt-1">1</div>
+          <div className="overflow-x-auto">
+            <table className="w-full mes-table">
+              <thead>
+                <tr>
+                  <th className="px-4 py-2 text-left">Product</th>
+                  <th className="px-4 py-2 text-left">Planned Qty</th>
+                  <th className="px-4 py-2 text-left">Plant</th>
+                  <th className="px-4 py-2 text-left">Shift</th>
+                  <th className="px-4 py-2 text-left">Due Date</th>
+                  <th className="px-4 py-2 text-left">Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {productionOrders.map((o) => (
+                  <tr key={o.no} className="border-t border-[#EEF0F2] hover:bg-[#F8FAFC]">
+                    <td className="px-4 py-3 font-medium">{o.produk}</td>
+                    <td className="px-4 py-3 font-mono-num">{o.qty} Units</td>
+                    <td className="px-4 py-3">Plant 01</td>
+                    <td className="px-4 py-3"><span className="inline-block bg-[#F4F6F8] px-2 py-1 rounded text-xs">Morning Shift</span></td>
+                    <td className="px-4 py-3 text-[#59687A]">{o.tglSelesai || '-'}</td>
+                    <td className="px-4 py-3">{o.status}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         </div>
-          </TabsContent>
 
-          <TabsContent value="floor" className="mt-4">
-            <IsometricPlantFloor testId="plant-floor" />
-          </TabsContent>
-        </Tabs>
+        {/* Timeline overview (week) */}
+        <div className="bg-white border border-[#DFE3E8] rounded-md p-4">
+          <div className="text-sm font-semibold text-[#1C252E]">Timeline Overview (Weekly View)</div>
+          <div className="mt-4">
+            <GanttChart rows={planningRows} />
+          </div>
+        </div>
+
       </div>
     </div>
   );
 };
 
 export default ProductionPlanning;
+
+// Simple lightweight Gantt chart (day-indexed) — no external deps
+function GanttChart({ rows }) {
+  if (!rows || rows.length === 0) return <div className="text-sm text-[#59687A] p-4">No schedule data</div>;
+
+  const maxEnd = Math.max(...rows.map((r) => (r.start || 0) + (r.duration || 0)));
+  const days = Array.from({ length: maxEnd }, (_, i) => i);
+
+  const statusColor = (s) => {
+    if (!s) return "bg-gray-300";
+    if (s.toLowerCase().includes("selesai") || s.toLowerCase().includes("done")) return "bg-green-400";
+    if (s.toLowerCase().includes("progress") || s.toLowerCase().includes("casting") || s.toLowerCase().includes("curing")) return "bg-blue-400";
+    if (s.toLowerCase().includes("direncanakan") || s.toLowerCase().includes("planned")) return "bg-yellow-300";
+    return "bg-gray-300";
+  };
+
+  return (
+    <div className="overflow-x-auto">
+      <div className="min-w-[600px]">
+        {/* Header */}
+        <div className="flex items-center border-b border-[#EEF0F2]">
+          <div className="w-56 px-4 py-2 text-xs text-[#59687A]">Schedule</div>
+          {days.map((d) => (
+            <div key={d} className="px-3 py-2 text-xs text-center text-[#59687A] border-l border-[#EEF0F2]">D{d}</div>
+          ))}
+        </div>
+
+        {/* Rows */}
+        <div>
+          {rows.map((r) => (
+            <div key={r.no} className="flex items-center border-b border-[#F4F6F8]">
+              <div className="w-56 px-4 py-3 text-sm font-medium">{r.produk} <span className="text-xs text-[#8B97A6]">{r.batch}</span></div>
+              {days.map((d) => {
+                const isBar = d >= r.start && d < r.start + r.duration;
+                return (
+                  <div key={d} className="px-1 py-2 border-l border-[#F4F6F8]">
+                    {isBar ? (
+                      <div className={`${statusColor(r.status)} h-6 rounded-sm`} style={{ width: 28 }} />
+                    ) : (
+                      <div className="h-6" />
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}

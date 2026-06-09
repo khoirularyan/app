@@ -46,11 +46,11 @@ const ProductionOrders = () => {
               fields={[
                 { name: "produk", label: "Produk", type: "select", required: true, options: products.map(p => ({ value: p.kode, label: `${p.kode} — ${p.nama}` })) },
                 { name: "qty", label: "Quantity (unit)", type: "number", placeholder: "Mis. 50", required: true },
-                { name: "line", label: "Line Produksi", type: "select", required: true, options: [
-                  { value: "LINE-A", label: "Line A - Pipa Beton" },
-                  { value: "LINE-B", label: "Line B - U-Ditch" },
-                  { value: "LINE-C", label: "Line C - Box Culvert" },
-                  { value: "LINE-D", label: "Line D - Barrier" },
+                { name: "line", label: "Batch Produksi", type: "select", required: true, options: [
+                  { value: "LINE-A", label: "Batch A - Pipa Beton" },
+                  { value: "LINE-B", label: "Batch B - U-Ditch" },
+                  { value: "LINE-C", label: "Batch C - Box Culvert" },
+                  { value: "LINE-D", label: "Batch D - Barrier" },
                 ]},
                 { name: "customer", label: "Customer", type: "select", required: true, options: customers.map(c => ({ value: c.kode, label: c.nama })) },
                 { name: "tglMulai", label: "Tanggal Mulai", type: "date", required: true },
@@ -117,11 +117,11 @@ const ProductionOrders = () => {
               <FilterPopover
                 testId="po-filter"
                 selects={[
-                  { name: "line", label: "Line", options: [
-                    { value: "LINE-A", label: "Line A" },
-                    { value: "LINE-B", label: "Line B" },
-                    { value: "LINE-C", label: "Line C" },
-                    { value: "LINE-D", label: "Line D" },
+                  { name: "line", label: "Batch", options: [
+                    { value: "LINE-A", label: "Batch A" },
+                    { value: "LINE-B", label: "Batch B" },
+                    { value: "LINE-C", label: "Batch C" },
+                    { value: "LINE-D", label: "Batch D" },
                   ]},
                   { name: "prioritas", label: "Prioritas", options: [
                     { value: "Tinggi", label: "Tinggi" },
@@ -140,7 +140,7 @@ const ProductionOrders = () => {
                   <th className="px-4 py-2 text-left">No. Order</th>
                   <th className="px-4 py-2 text-left">Produk</th>
                   <th className="px-4 py-2 text-right">Qty</th>
-                  <th className="px-4 py-2 text-left">Line</th>
+                  <th className="px-4 py-2 text-left">Batch</th>
                   <th className="px-4 py-2 text-left">Customer</th>
                   <th className="px-4 py-2 text-left">Periode</th>
                   <th className="px-4 py-2 text-left w-48">Progress</th>
@@ -178,7 +178,7 @@ const ProductionOrders = () => {
                             { label: "No. Order", value: o.no },
                             { label: "Produk", value: o.produk },
                             { label: "Quantity", value: `${o.qty} unit` },
-                            { label: "Line Produksi", value: o.line },
+                            { label: "Batch Produksi", value: o.line },
                             { label: "Customer", value: o.customer },
                             { label: "Prioritas", value: o.prioritas, render: (v) => <StatusBadge status={v} /> },
                           ]},

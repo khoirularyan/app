@@ -29,7 +29,7 @@ const SalesOrders = () => {
               successMessage="Sales order berhasil dibuat"
               fields={[
                 { name: "customer", label: "Customer", type: "select", required: true, options: customers.map(c => ({ value: c.kode, label: c.nama })) },
-                { name: "produk", label: "Produk Utama", type: "select", required: true, options: products.map(p => ({ value: p.kode, label: `${p.kode} — ${p.nama}` })) },
+                { name: "produk", label: "Produk", type: "multiselect", required: true, options: products.map(p => ({ value: p.kode, label: `${p.kode} — ${p.nama}` })) },
                 { name: "qty", label: "Quantity", type: "number", required: true },
                 { name: "nilai", label: "Nilai Order (Rp)", type: "number", required: true },
                 { name: "tglOrder", label: "Tanggal Order", type: "date", required: true },

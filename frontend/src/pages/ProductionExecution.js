@@ -145,7 +145,35 @@ const StageEditDialog = ({ open, onOpenChange, order, onSave }) => (
 const ProductionExecution = () => {
   const [orders, setOrders] = useState(productionOrders);
   const [editOrder, setEditOrder] = useState(null);
+  const [execQtyMap, setExecQtyMap] = useState({});
   const active = orders.filter((o) => o.status !== "Selesai" && o.status !== "Direncanakan");
+
+  const handleStartExecution = (orderNo) => {
+    const qty = Number(execQtyMap[orderNo] || 0);
+    const ord = orders.find((o) => o.no === orderNo);
+    if (!ord) return;
+    const executed = Number(ord.executed || 0);
+    const remaining = ord.qty - executed;
+    if (!qty || qty <= 0) {
+      toast.error("Masukkan jumlah eksekusi yang valid (>=1)");
+      return;
+    }
+    if (qty > remaining) {
+      toast.error(`Maksimum sisa untuk dieksekusi: ${remaining}`);
+      return;
+    }
+
+    setOrders((prev) => prev.map((o) => {
+      if (o.no !== orderNo) return o;
+      const newExecuted = (Number(o.executed || 0) + qty);
+      const newProgress = Math.min(100, Math.round((newExecuted / o.qty) * 100));
+      const newStatus = newProgress >= 100 ? "Selesai" : "Production";
+      return { ...o, executed: newExecuted, progress: newProgress, status: newStatus };
+    }));
+
+    setExecQtyMap((m) => ({ ...m, [orderNo]: "" }));
+    toast.success(`Mulai eksekusi ${qty} unit untuk ${orderNo}`);
+  };
 
   const handleSaveStage = ({ status, progress, note }) => {
     setOrders((prev) =>
@@ -307,7 +335,8 @@ const ProductionExecution = () => {
                 <th className="px-4 py-2 text-left">Tahap Saat Ini</th>
                 <th className="px-4 py-2 text-left w-56">Progress</th>
                 <th className="px-4 py-2 text-left">Target Selesai</th>
-                <th className="px-4 py-2 text-right">Aksi</th>
+                  <th className="px-4 py-2 text-left">Eksekusi</th>
+                  <th className="px-4 py-2 text-right">Aksi</th>
               </tr>
             </thead>
             <tbody>
@@ -320,7 +349,10 @@ const ProductionExecution = () => {
                       <span className="font-medium">{o.produk}</span>
                     </div>
                   </td>
-                  <td className="px-4 text-right font-mono-num">{o.qty}</td>
+                  <td className="px-4 text-right font-mono-num">
+                    <div>{o.qty}</div>
+                    <div className="text-xs text-[#59687A]">Selesai: {o.executed || 0}</div>
+                  </td>
                   <td className="px-4">{o.line}</td>
                   <td className="px-4"><StatusBadge status={o.status} /></td>
                   <td className="px-4">
@@ -330,6 +362,22 @@ const ProductionExecution = () => {
                     </div>
                   </td>
                   <td className="px-4 font-mono-num text-[#59687A]">{o.tglSelesai}</td>
+                  <td className="px-4 text-left">
+                    <div className="flex items-center gap-2 justify-start">
+                      <input
+                        type="number"
+                        min={1}
+                        max={o.qty - (o.executed || 0)}
+                        value={execQtyMap[o.no] ?? ""}
+                        onChange={(e) => setExecQtyMap((m) => ({ ...m, [o.no]: e.target.value }))}
+                        className="w-20 h-8 text-sm px-2 border rounded text-right"
+                        data-testid={`exec-input-${o.no}`}
+                      />
+                      <Button size="sm" className="h-8 text-xs" onClick={() => handleStartExecution(o.no)} data-testid={`exec-start-${o.no}`}>
+                        Mulai
+                      </Button>
+                    </div>
+                  </td>
                   <td className="px-4 text-right">
                     <Button
                       data-testid={`btn-edit-stage-${i}`}

@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 
 /**
@@ -47,7 +48,7 @@ export const FormDialog = ({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>{trigger}</DialogTrigger>
-      <DialogContent className="max-w-2xl" data-testid={`${testId}-content`}>
+      <DialogContent className="max-w-2xl max-h-[80vh] overflow-hidden" data-testid={`${testId}-content`}>
         <DialogHeader>
           <DialogTitle className="text-base font-display">{title}</DialogTitle>
           {description && (
@@ -55,7 +56,7 @@ export const FormDialog = ({
           )}
         </DialogHeader>
         <form onSubmit={handleSubmit}>
-          <div className="grid grid-cols-2 gap-4 py-2">
+          <div className="grid grid-cols-2 gap-4 py-2 max-h-[58vh] overflow-y-auto pr-2">
             {fields.map((f) => (
               <div key={f.name} className={f.span === 2 ? "col-span-2" : "col-span-2 md:col-span-1"}>
                 <Label htmlFor={f.name} className="text-xs font-medium text-[#1C252E] mb-1.5 block">
@@ -83,6 +84,28 @@ export const FormDialog = ({
                       ))}
                     </SelectContent>
                   </Select>
+                ) : f.type === "multiselect" ? (
+                  <div className="space-y-2">
+                    {f.options.map((o) => {
+                      const selected = (values[f.name] || []).includes(o.value);
+                      return (
+                        <label key={o.value} className="flex items-center gap-2 text-sm text-[#1C252E]">
+                          <Checkbox
+                            checked={selected}
+                            onCheckedChange={(checked) => {
+                              const current = values[f.name] || [];
+                              const next = checked
+                                ? [...current, o.value]
+                                : current.filter((v) => v !== o.value);
+                              handleChange(f.name, next);
+                            }}
+                            id={`${f.name}-${o.value}`}
+                          />
+                          <span>{o.label}</span>
+                        </label>
+                      );
+                    })}
+                  </div>
                 ) : (
                   <Input
                     id={f.name}
