@@ -27,7 +27,7 @@ export const NotificationsPopover = () => {
             <div className="text-sm font-semibold text-[#1C252E] font-display">Notifikasi</div>
             <div className="text-[11px] text-[#59687A]">{items.length} pesan baru</div>
           </div>
-          <button className="text-[11px] text-[#0A6ED1] hover:underline">Tandai sudah dibaca</button>
+          <button onClick={() => toast.success("Semua notifikasi ditandai sudah dibaca")} className="text-[11px] text-[#0A6ED1] hover:underline" data-testid="notif-mark-read">Tandai sudah dibaca</button>
         </div>
         <div className="max-h-96 overflow-y-auto">
           {items.map((it, i) => {
@@ -47,7 +47,7 @@ export const NotificationsPopover = () => {
           })}
         </div>
         <div className="px-4 py-2 border-t border-[#DFE3E8] text-center">
-          <button className="text-[11px] text-[#0A6ED1] hover:underline">Lihat semua notifikasi →</button>
+          <button onClick={() => toast.info("Membuka pusat notifikasi lengkap...")} className="text-[11px] text-[#0A6ED1] hover:underline" data-testid="notif-see-all">Lihat semua notifikasi →</button>
         </div>
       </PopoverContent>
     </Popover>
