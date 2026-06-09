@@ -2,10 +2,15 @@ import PageHeader from "@/components/shared/PageHeader";
 import StatusBadge from "@/components/shared/StatusBadge";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { productionOrders, productionLines } from "@/data/mockData";
-import { ArrowRight } from "lucide-react";
+import {
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter,
+} from "@/components/ui/dialog";
+import { useState, useEffect } from "react";
+import { productionOrders, productionLines, productionStatuses, processDefinitions } from "@/data/mockData";
+import { ArrowRight, Pencil, ArrowUpRight, Clock } from "lucide-react";
 import { ProcessIcon } from "@/components/visuals/ProcessIcons";
 import ProductIcon from "@/components/visuals/ProductIcon";
+import { toast } from "sonner";
 
 const stages = [
   { id: "casting",    label: "Casting",         color: "#0A6ED1" },
@@ -14,8 +19,145 @@ const stages = [
   { id: "qc",         label: "Quality Control", color: "#107E3E" },
 ];
 
+// Stage choices derived from configurable production statuses (Master Data).
+const stageOptions = productionStatuses.filter((s) => s.aktif && s.status !== "Direncanakan");
+
+const StageEditDialog = ({ open, onOpenChange, order, onSave }) => {
+  const [newStage, setNewStage] = useState("");
+  const [progress, setProgress] = useState(0);
+  const [note, setNote] = useState("");
+
+  useEffect(() => {
+    if (open && order) {
+      setNewStage(order.status);
+      setProgress(order.progress);
+      setNote("");
+    }
+  }, [open, order]);
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-lg p-0 overflow-hidden" data-testid="stage-edit-dialog">
+        <div className="px-6 py-4 bg-gradient-to-r from-[#0A6ED1] to-[#0854A1] text-white">
+          <DialogHeader>
+            <div className="text-[10px] uppercase tracking-[0.2em] text-white/75 font-semibold">Edit Tahap Produksi</div>
+            <DialogTitle className="text-base font-display text-white">{order?.no}</DialogTitle>
+            <DialogDescription className="text-xs text-white/85">
+              {order?.produk} · {order?.qty} unit · Line {order?.line}
+            </DialogDescription>
+          </DialogHeader>
+        </div>
+
+        <div className="p-6 space-y-4">
+          {/* Current */}
+          <div className="grid grid-cols-2 gap-3">
+            <div className="bg-[#F8FAFC] border border-[#DFE3E8] rounded p-3">
+              <div className="text-[10px] uppercase tracking-wider text-[#59687A] font-semibold">Tahap Saat Ini</div>
+              <div className="mt-1.5"><StatusBadge status={order?.status || ""} /></div>
+            </div>
+            <div className="bg-[#F8FAFC] border border-[#DFE3E8] rounded p-3">
+              <div className="text-[10px] uppercase tracking-wider text-[#59687A] font-semibold">Progress Sekarang</div>
+              <div className="text-xl font-semibold font-mono-num text-[#1C252E] mt-1">{order?.progress}%</div>
+            </div>
+          </div>
+
+          {/* New stage picker */}
+          <div>
+            <label className="text-[11px] uppercase tracking-wider text-[#59687A] font-semibold">Pilih Tahap Baru</label>
+            <div className="grid grid-cols-2 gap-2 mt-2" data-testid="stage-picker">
+              {stageOptions.map((s) => {
+                const selected = newStage === s.status;
+                return (
+                  <button
+                    key={s.kode}
+                    data-testid={`stage-option-${s.status.replace(/\s/g, "-")}`}
+                    onClick={() => setNewStage(s.status)}
+                    className={`text-left p-2.5 rounded border transition-all ${
+                      selected ? "border-[#0A6ED1] bg-[#E5F0FA]" : "border-[#DFE3E8] hover:border-[#0A6ED1]"
+                    }`}
+                  >
+                    <div className="flex items-center gap-2">
+                      <span className="w-2 h-2 rounded-full" style={{ backgroundColor: s.warna }} />
+                      <span className="text-xs font-semibold text-[#1C252E]">{s.status}</span>
+                    </div>
+                    <div className="text-[10px] text-[#59687A] mt-0.5 line-clamp-1">{s.deskripsi}</div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Progress slider */}
+          <div>
+            <div className="flex items-center justify-between">
+              <label className="text-[11px] uppercase tracking-wider text-[#59687A] font-semibold">Progress (%)</label>
+              <span className="text-sm font-mono-num font-semibold text-[#0A6ED1]" data-testid="stage-progress-value">{progress}%</span>
+            </div>
+            <input
+              type="range"
+              min={0} max={100} step={1}
+              value={progress}
+              onChange={(e) => setProgress(Number(e.target.value))}
+              className="w-full mt-2 accent-[#0A6ED1]"
+              data-testid="stage-progress-slider"
+            />
+            <div className="flex items-center justify-between text-[10px] text-[#59687A] font-mono-num mt-1">
+              <span>0%</span><span>50%</span><span>100%</span>
+            </div>
+          </div>
+
+          {/* Note */}
+          <div>
+            <label className="text-[11px] uppercase tracking-wider text-[#59687A] font-semibold">Catatan Operator (opsional)</label>
+            <input
+              type="text"
+              value={note}
+              onChange={(e) => setNote(e.target.value)}
+              placeholder="Mis. Selesai casting, masuk chamber B"
+              data-testid="stage-note-input"
+              className="w-full mt-1 h-9 px-2.5 text-sm border border-[#DFE3E8] rounded focus:outline-none focus:ring-2 focus:ring-[#0A6ED1]/30 focus:border-[#0A6ED1]"
+            />
+          </div>
+
+          {/* Stage definitions reference */}
+          <div className="text-[10px] text-[#59687A] flex items-center gap-1.5 border-t border-[#EEF0F2] pt-2">
+            <Clock className="w-3 h-3" />
+            Tahap dapat dikonfigurasi lewat <a href="/master-process" className="text-[#0A6ED1] hover:underline">Master Proses</a> ({processDefinitions.filter((p) => p.aktif).length} tahap aktif)
+          </div>
+        </div>
+
+        <DialogFooter className="px-6 py-3 bg-[#F8FAFC] border-t border-[#EEF0F2]">
+          <Button variant="outline" size="sm" onClick={() => onOpenChange(false)} data-testid="stage-edit-cancel">Batal</Button>
+          <Button
+            size="sm" className="bg-[#0A6ED1] hover:bg-[#0854A1]"
+            data-testid="stage-edit-save"
+            onClick={() => {
+              onSave({ status: newStage, progress, note });
+              onOpenChange(false);
+            }}
+          >
+            Simpan Perubahan
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
 const ProductionExecution = () => {
-  const active = productionOrders.filter((o) => o.status !== "Selesai" && o.status !== "Direncanakan");
+  const [orders, setOrders] = useState(productionOrders);
+  const [editOrder, setEditOrder] = useState(null);
+  const active = orders.filter((o) => o.status !== "Selesai" && o.status !== "Direncanakan");
+
+  const handleSaveStage = ({ status, progress, note }) => {
+    setOrders((prev) =>
+      prev.map((o) => (o.no === editOrder.no ? { ...o, status, progress } : o))
+    );
+    toast.success(
+      `${editOrder.no} → ${status}`,
+      { description: `Progress ${progress}%${note ? ` · ${note}` : ""}` }
+    );
+  };
 
   return (
     <div>
@@ -46,7 +188,6 @@ const ProductionExecution = () => {
               { id: "storage",   label: "Storage",    color: "#59687A", inQ: 20, outQ: 18, wait: 0,  util: 92 },
             ].map((s, i, arr) => (
               <div key={s.id} data-testid={`pipeline-${s.id}`} className="relative px-4 py-4 border-r border-[#EEF0F2] last:border-r-0 group hover:bg-[#F8FAFC] transition-colors">
-                {/* Stage number bubble */}
                 <div className="flex items-center justify-between mb-2">
                   <div className="flex items-center gap-2">
                     <span className="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold text-white" style={{ backgroundColor: s.color }}>
@@ -54,10 +195,8 @@ const ProductionExecution = () => {
                     </span>
                     <span className="text-sm font-semibold text-[#1C252E]">{s.label}</span>
                   </div>
-                  {/* Pulse dot */}
                   <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ backgroundColor: s.color }} />
                 </div>
-                {/* Utilization bar */}
                 <div className="mb-3">
                   <div className="flex items-center justify-between text-[10px] text-[#59687A] mb-1">
                     <span>Utilisasi</span>
@@ -67,7 +206,6 @@ const ProductionExecution = () => {
                     <div className="h-full transition-all" style={{ width: `${s.util}%`, backgroundColor: s.color }} />
                   </div>
                 </div>
-                {/* In/Out/Waiting */}
                 <div className="grid grid-cols-3 gap-1 text-center">
                   <div>
                     <div className="text-[9px] uppercase tracking-wider text-[#59687A] font-semibold">In</div>
@@ -82,7 +220,6 @@ const ProductionExecution = () => {
                     <div className="text-sm font-mono-num font-semibold text-[#E9730C]">{s.wait}</div>
                   </div>
                 </div>
-                {/* Arrow connector */}
                 {i < arr.length - 1 && (
                   <div className="hidden md:flex absolute right-[-7px] top-1/2 -translate-y-1/2 w-3.5 h-3.5 items-center justify-center bg-white border border-[#DFE3E8] rounded-full z-10">
                     <svg width="8" height="8" viewBox="0 0 8 8"><path d="M1 1 L 5 4 L 1 7" stroke="#59687A" strokeWidth="1.4" fill="none" /></svg>
@@ -91,7 +228,6 @@ const ProductionExecution = () => {
               </div>
             ))}
           </div>
-          {/* Bottom flow band */}
           <div className="h-1 bg-gradient-to-r from-[#0A6ED1] via-[#0070F2] via-30% via-[#E9730C] via-60% via-[#107E3E] via-85% to-[#59687A]" />
         </div>
 
@@ -148,7 +284,6 @@ const ProductionExecution = () => {
                       <span className="text-3xl font-semibold font-mono-num" style={{ color: s.color }}>{count}</span>
                       <span className="text-xs text-[#59687A]">order aktif</span>
                     </div>
-                    {/* Bottom accent bar */}
                     <div className="absolute bottom-0 left-0 right-0 h-0.5" style={{ backgroundColor: s.color }} />
                   </div>
                   {i < stages.length - 1 && <ArrowRight className="w-4 h-4 text-[#59687A] flex-shrink-0" />}
@@ -162,7 +297,7 @@ const ProductionExecution = () => {
         <div className="bg-white border border-[#DFE3E8] rounded-md overflow-hidden">
           <div className="px-4 py-3 border-b border-[#DFE3E8]">
             <div className="text-base font-semibold text-[#1C252E] font-display">Order Sedang Berjalan</div>
-            <div className="text-xs text-[#59687A]">Total {active.length} order aktif di lantai produksi</div>
+            <div className="text-xs text-[#59687A]">Total {active.length} order aktif di lantai produksi · Klik <span className="font-medium text-[#0A6ED1]">Edit Tahap</span> untuk mengubah tahap & progress</div>
           </div>
           <table className="w-full mes-table">
             <thead>
@@ -172,8 +307,9 @@ const ProductionExecution = () => {
                 <th className="px-4 py-2 text-right">Qty</th>
                 <th className="px-4 py-2 text-left">Line</th>
                 <th className="px-4 py-2 text-left">Tahap Saat Ini</th>
-                <th className="px-4 py-2 text-left w-64">Progress</th>
+                <th className="px-4 py-2 text-left w-56">Progress</th>
                 <th className="px-4 py-2 text-left">Target Selesai</th>
+                <th className="px-4 py-2 text-right">Aksi</th>
               </tr>
             </thead>
             <tbody>
@@ -196,11 +332,29 @@ const ProductionExecution = () => {
                     </div>
                   </td>
                   <td className="px-4 font-mono-num text-[#59687A]">{o.tglSelesai}</td>
+                  <td className="px-4 text-right">
+                    <Button
+                      data-testid={`btn-edit-stage-${i}`}
+                      variant="outline"
+                      size="sm"
+                      className="h-7 text-[11px] gap-1 hover:bg-[#E5F0FA] hover:border-[#0A6ED1] hover:text-[#0A6ED1]"
+                      onClick={() => setEditOrder(o)}
+                    >
+                      <Pencil className="w-3 h-3" /> Edit Tahap
+                    </Button>
+                  </td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
+
+        <StageEditDialog
+          open={Boolean(editOrder)}
+          onOpenChange={(o) => { if (!o) setEditOrder(null); }}
+          order={editOrder}
+          onSave={handleSaveStage}
+        />
       </div>
     </div>
   );
