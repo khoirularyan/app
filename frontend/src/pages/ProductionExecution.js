@@ -13,10 +13,11 @@ import ProductIcon from "@/components/visuals/ProductIcon";
 import { toast } from "sonner";
 
 const stages = [
-  { id: "casting",    label: "Casting",         color: "#0A6ED1" },
-  { id: "curing",     label: "Curing",          color: "#E9730C" },
-  { id: "demoulding", label: "Demoulding",      color: "#0070F2" },
-  { id: "qc",         label: "Quality Control", color: "#107E3E" },
+  { id: "preparation", label: "Preparation", color: "#0A6ED1" },
+  { id: "material",    label: "Material",    color: "#0070F2" },
+  { id: "production",  label: "Production",  color: "#E9730C" },
+  { id: "finishing",   label: "Finishing",   color: "#107E3E" },
+  { id: "removal",     label: "Removal",     color: "#59687A" },
 ];
 
 // Stage choices derived from configurable production statuses (Master Data).
@@ -34,7 +35,7 @@ const StageEditBody = ({ order, onSave, onCancel }) => {
           <div className="text-[10px] uppercase tracking-[0.2em] text-white/75 font-semibold">Edit Tahap Produksi</div>
           <DialogTitle className="text-base font-display text-white">{order.no}</DialogTitle>
           <DialogDescription className="text-xs text-white/85">
-            {order.produk} · {order.qty} unit · Line {order.line}
+            {order.produk} · {order.qty} unit · Batch {order.line}
           </DialogDescription>
         </DialogHeader>
       </div>
@@ -255,7 +256,7 @@ const ProductionExecution = () => {
           <div className="flex items-center justify-between mb-4">
             <div>
               <div className="text-base font-semibold text-[#1C252E] font-display">Alur Proses Produksi</div>
-              <div className="text-xs text-[#59687A]">Casting → Curing → Demoulding → Quality Control</div>
+              <div className="text-xs text-[#59687A]">Preparation → Material → Production → Finishing → Removal</div>
             </div>
           </div>
           <div className="flex items-stretch gap-2 overflow-x-auto">
@@ -294,7 +295,7 @@ const ProductionExecution = () => {
         <div className="bg-white border border-[#DFE3E8] rounded-md overflow-hidden">
           <div className="px-4 py-3 border-b border-[#DFE3E8]">
             <div className="text-base font-semibold text-[#1C252E] font-display">Order Sedang Berjalan</div>
-            <div className="text-xs text-[#59687A]">Total {active.length} order aktif di lantai produksi · Klik <span className="font-medium text-[#0A6ED1]">Edit Tahap</span> untuk mengubah tahap & progress</div>
+            <div className="text-xs text-[#59687A]">Total {active.length} order aktif di batch produksi · Klik <span className="font-medium text-[#0A6ED1]">Edit Tahap</span> untuk mengubah tahap & progress</div>
           </div>
           <table className="w-full mes-table">
             <thead>
@@ -302,7 +303,7 @@ const ProductionExecution = () => {
                 <th className="px-4 py-2 text-left">No. PO</th>
                 <th className="px-4 py-2 text-left">Produk</th>
                 <th className="px-4 py-2 text-right">Qty</th>
-                <th className="px-4 py-2 text-left">Line</th>
+                <th className="px-4 py-2 text-left">Batch</th>
                 <th className="px-4 py-2 text-left">Tahap Saat Ini</th>
                 <th className="px-4 py-2 text-left w-56">Progress</th>
                 <th className="px-4 py-2 text-left">Target Selesai</th>

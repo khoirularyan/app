@@ -71,6 +71,7 @@ export const recentActivities = [
 
 // ===== PRODUCTS =====
 export const products = [
+  { kode: "PC-BEAM-GIRDER-1200", nama: "PC Beam Girder 1200", kategori: "Beam", varian: "PC-BG-1200", spek: "1200mm × 300mm × 6000mm", grade: "K-400", berat: 3200, harga: 6450000 },
   { kode: "PIPE-RC-300", nama: "Pipa Beton Bertulang Ø300mm", kategori: "Pipa", varian: "RCP-300-K350", spek: "Ø300 × 2000mm", grade: "K-350", berat: 145, harga: 285000 },
   { kode: "PIPE-RC-600", nama: "Pipa Beton Bertulang Ø600mm", kategori: "Pipa", varian: "RCP-600-K350", spek: "Ø600 × 2000mm", grade: "K-350", berat: 425, harga: 850000 },
   { kode: "PIPE-RC-1000", nama: "Pipa Beton Bertulang Ø1000mm", kategori: "Pipa", varian: "RCP-1000-K400", spek: "Ø1000 × 2000mm", grade: "K-400", berat: 1240, harga: 2450000 },
@@ -87,6 +88,35 @@ export const products = [
   { kode: "SR-100", nama: "Sumur Resapan Ø1000", kategori: "Sumur Resapan", varian: "SR-100-K300", spek: "Ø1000 × 1000mm", grade: "K-300", berat: 580, harga: 1150000 },
 ];
 
+export const bomItems = {
+  "PC-BEAM-GIRDER-1200": {
+    productName: "PC Beam Girder 1200",
+    activeVersion: "V2.4",
+    versionLabel: "V2.4",
+    lastUpdated: "04 Jun 2026",
+    lastUpdatedBy: "Rina Permata",
+    standardUnit: "Panel",
+    bomEfficiency: 94,
+    calculatedWeight: 12.4,
+    estimatedProductionCost: 186500000,
+    overheadPct: 18,
+    components: [
+      { kode: "MAT-001", nama: "Semen Portland Type I", satuan: "KG", qtyPerUnit: 210.5, wastePct: 2.5, cost: 304000, hargaPerUnit: 1450 },
+      { kode: "MAT-002", nama: "Pasir Lumajang", satuan: "M3", qtyPerUnit: 0.54, wastePct: 3.1, cost: 154000, hargaPerUnit: 285000 },
+      { kode: "MAT-005", nama: "Besi Beton D10", satuan: "KG", qtyPerUnit: 62.0, wastePct: 1.8, cost: 837000, hargaPerUnit: 13500 },
+      { kode: "MAT-009", nama: "Sika ViscoCrete 1003", satuan: "LTR", qtyPerUnit: 4.4, wastePct: 0.5, cost: 169600, hargaPerUnit: 38500 },
+      { kode: "MAT-010", nama: "MasterGlenium ACE 8595", satuan: "LTR", qtyPerUnit: 2.1, wastePct: 0.5, cost: 109200, hargaPerUnit: 52000 },
+      { kode: "MAT-011", nama: "Air Bersih", satuan: "M3", qtyPerUnit: 0.18, wastePct: 0.0, cost: 1530, hargaPerUnit: 8500 },
+    ],
+  },
+};
+
+export const bomVersionHistory = [
+  { version: "V2.4", catatan: "Optimized material mix and reduced waste", status: "Active", tanggal: "04 Jun 2026", author: "Rina Permata" },
+  { version: "V2.3", catatan: "Updated reinforcement layout and casting tolerances", status: "Archived", tanggal: "28 Mei 2026", author: "Arif Hidayat" },
+  { version: "V2.2", catatan: "Added new curing schedule and labor overhead", status: "Archived", tanggal: "15 Mei 2026", author: "Dewi Kartika" },
+];
+
 export const productCategories = [
   { kode: "CAT-001", nama: "Pipa", deskripsi: "Pipa beton bertulang & non bertulang", jumlahProduk: 4 },
   { kode: "CAT-002", nama: "Jacking", deskripsi: "Jacking pipe untuk micro tunneling", jumlahProduk: 1 },
@@ -95,6 +125,7 @@ export const productCategories = [
   { kode: "CAT-005", nama: "Box Culvert", deskripsi: "Saluran tertutup persegi", jumlahProduk: 2 },
   { kode: "CAT-006", nama: "Barrier", deskripsi: "Pemisah jalan beton", jumlahProduk: 1 },
   { kode: "CAT-007", nama: "Sumur Resapan", deskripsi: "Drainase peresapan air", jumlahProduk: 1 },
+  { kode: "CAT-008", nama: "Beam", deskripsi: "Produk girder dan balok pracetak", jumlahProduk: 1 },
 ];
 
 export const concreteGrades = [
@@ -362,17 +393,17 @@ export const efficiencyByLine = [
 export const navigationItems = [
   { id: "dashboard", label: "Dashboard", icon: "LayoutDashboard", path: "/" },
   { id: "master-data", label: "Master Data", icon: "Database", path: "/master-data" },
-  { id: "master-process", label: "Master Proses", icon: "GitBranch", path: "/master-process" },
+  { id: "master-bom", label: "Master BOM", icon: "Package", path: "/master-bom" },
   { id: "planning", label: "Perencanaan Produksi", icon: "CalendarRange", path: "/planning" },
   { id: "production-orders", label: "Order Produksi", icon: "ClipboardList", path: "/production-orders" },
   { id: "production-execution", label: "Eksekusi Produksi", icon: "Factory", path: "/production-execution" },
-  { id: "curing", label: "Curing", icon: "Thermometer", path: "/curing" },
-  { id: "quality", label: "Quality Control", icon: "ShieldCheck", path: "/quality" },
   { id: "inventory", label: "Persediaan", icon: "Package", path: "/inventory" },
   { id: "sales", label: "Order Penjualan", icon: "ShoppingCart", path: "/sales" },
   { id: "delivery", label: "Pengiriman", icon: "Truck", path: "/delivery" },
   { id: "purchasing", label: "Pembelian", icon: "ShoppingBag", path: "/purchasing" },
   { id: "maintenance", label: "Pemeliharaan", icon: "Wrench", path: "/maintenance" },
+  { id: "curing", label: "Curing", icon: "Thermometer", path: "/curing" },
+  { id: "quality", label: "Quality Control", icon: "ShieldCheck", path: "/quality" },
   { id: "reports", label: "Laporan", icon: "FileBarChart", path: "/reports" },
 ];
 
