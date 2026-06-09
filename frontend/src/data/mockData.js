@@ -1,8 +1,8 @@
 // Mock data for Precast Concrete MES Dashboard - Bahasa Indonesia
 
 export const company = {
-  name: "PT Beton Pracetak Nusantara",
-  plant: "Plant Surabaya",
+  name: "PT Megacon Bangun Perkasa",
+  plant: "Plant Bekasi",
   shift: "Shift 1 - Pagi",
   operator: "Budi Santoso",
 };

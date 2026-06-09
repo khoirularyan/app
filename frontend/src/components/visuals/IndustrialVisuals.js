@@ -327,7 +327,7 @@ export const OEEGauge = ({ value = 80, label = "Line A", subLabel = "OEE", size 
 };
 
 // ===== Dashboard Hero Banner =====
-export const FactoryHero = ({ company = "PT Beton Pracetak Nusantara", plant = "Plant Surabaya", shift = "Shift 1 - Pagi" }) => {
+export const FactoryHero = ({ company = "PT Megacon Bangun Perkasa", plant = "Plant Surabaya", shift = "Shift 1 - Pagi" }) => {
   return (
     <div
       className="relative overflow-hidden rounded-md border border-[#DFE3E8]"

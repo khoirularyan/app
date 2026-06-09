@@ -1,12 +1,14 @@
 import PageHeader from "@/components/shared/PageHeader";
 import StatusBadge from "@/components/shared/StatusBadge";
 import { Button } from "@/components/ui/button";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { planningRows, products, customers } from "@/data/mockData";
-import { ChevronLeft, ChevronRight, Plus, Download } from "lucide-react";
+import { ChevronLeft, ChevronRight, Plus, Download, CalendarRange, Factory } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import FormDialog from "@/components/shared/FormDialog";
 import { showExportToast } from "@/components/shared/FilterPopover";
+import IsometricPlantFloor from "@/components/visuals/IsometricPlantFloor";
 
 const days = ["Sen 10", "Sel 11", "Rab 12", "Kam 13", "Jum 14", "Sab 15", "Min 16", "Sen 17"];
 
@@ -57,6 +59,17 @@ const ProductionPlanning = () => {
         }
       />
       <div className="p-6 space-y-4">
+        <Tabs defaultValue="gantt">
+          <TabsList className="bg-[#F4F6F8] border border-[#DFE3E8] h-9 p-0.5">
+            <TabsTrigger value="gantt" className="text-xs h-8 gap-1.5 data-[state=active]:bg-white" data-testid="planning-tab-gantt">
+              <CalendarRange className="w-3.5 h-3.5" /> Jadwal Gantt
+            </TabsTrigger>
+            <TabsTrigger value="floor" className="text-xs h-8 gap-1.5 data-[state=active]:bg-white" data-testid="planning-tab-floor">
+              <Factory className="w-3.5 h-3.5" /> Plant Floor — Digital Twin
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="gantt" className="mt-4 space-y-4">
         {/* Date controls */}
         <div className="bg-white border border-[#DFE3E8] rounded-md p-3 flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -141,6 +154,12 @@ const ProductionPlanning = () => {
             <div className="text-2xl font-semibold text-[#107E3E] font-mono-num mt-1">1</div>
           </div>
         </div>
+          </TabsContent>
+
+          <TabsContent value="floor" className="mt-4">
+            <IsometricPlantFloor testId="plant-floor" />
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );
