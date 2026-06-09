@@ -1,54 +1,44 @@
-import { useEffect } from "react";
 import "@/App.css";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import axios from "axios";
-import { HOME } from "@/constants/testIds";
-
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
-const API = `${BACKEND_URL}/api`;
-
-const Home = () => {
-  const helloWorldApi = async () => {
-    try {
-      const response = await axios.get(`${API}/`);
-      console.log(response.data.message);
-    } catch (e) {
-      console.error(e, `errored out requesting / api`);
-    }
-  };
-
-  useEffect(() => {
-    helloWorldApi();
-  }, []);
-
-  return (
-    <div>
-      <header className="App-header">
-        <a
-          data-testid={HOME.emergentLink}
-          className="App-link"
-          href="https://emergent.sh"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <img src="https://avatars.githubusercontent.com/in/1201222?s=120&u=2686cf91179bbafbc7a71bfbc43004cf9ae1acea&v=4" />
-        </a>
-        <p className="mt-5">Building something incredible ~!</p>
-      </header>
-    </div>
-  );
-};
+import AppLayout from "@/components/layout/AppLayout";
+import Dashboard from "@/pages/Dashboard";
+import MasterData from "@/pages/MasterData";
+import ProductionPlanning from "@/pages/ProductionPlanning";
+import ProductionOrders from "@/pages/ProductionOrders";
+import ProductionExecution from "@/pages/ProductionExecution";
+import CuringManagement from "@/pages/CuringManagement";
+import QualityControl from "@/pages/QualityControl";
+import Inventory from "@/pages/Inventory";
+import SalesOrders from "@/pages/SalesOrders";
+import DeliveryOrders from "@/pages/DeliveryOrders";
+import Purchasing from "@/pages/Purchasing";
+import Maintenance from "@/pages/Maintenance";
+import Reports from "@/pages/Reports";
+import { Toaster } from "@/components/ui/sonner";
 
 function App() {
   return (
     <div className="App">
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<Home />}>
-            <Route index element={<Home />} />
+          <Route element={<AppLayout />}>
+            <Route path="/" element={<Dashboard />} />
+            <Route path="/master-data" element={<MasterData />} />
+            <Route path="/planning" element={<ProductionPlanning />} />
+            <Route path="/production-orders" element={<ProductionOrders />} />
+            <Route path="/production-execution" element={<ProductionExecution />} />
+            <Route path="/curing" element={<CuringManagement />} />
+            <Route path="/quality" element={<QualityControl />} />
+            <Route path="/inventory" element={<Inventory />} />
+            <Route path="/sales" element={<SalesOrders />} />
+            <Route path="/delivery" element={<DeliveryOrders />} />
+            <Route path="/purchasing" element={<Purchasing />} />
+            <Route path="/maintenance" element={<Maintenance />} />
+            <Route path="/reports" element={<Reports />} />
           </Route>
         </Routes>
       </BrowserRouter>
+      <Toaster richColors position="top-right" />
     </div>
   );
 }
