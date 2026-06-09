@@ -141,6 +141,7 @@ const ZONES = [
 export const IsometricPlantFloor = ({ testId = "plant-floor" }) => {
   const [selected, setSelected] = useState(null);
   const zone = ZONES.find((z) => z.id === selected);
+  const counts = ZONES.reduce((acc, z) => ((acc[z.status] = (acc[z.status] || 0) + 1), acc), {});
 
   return (
     <div className="bg-white border border-[#DFE3E8] rounded-md overflow-hidden" data-testid={testId}>
@@ -154,10 +155,10 @@ export const IsometricPlantFloor = ({ testId = "plant-floor" }) => {
           </div>
         </div>
         <div className="flex items-center gap-4 text-[11px] text-[#B9DCFF]">
-          <span className="inline-flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-[#5DCB7E] animate-pulse" />6 Beroperasi</span>
-          <span className="inline-flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-[#E9730C]" />2 Perhatian</span>
-          <span className="inline-flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-[#59687A]" />1 Standby</span>
-          <span className="inline-flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-[#9C4F00]" />1 Maintenance</span>
+          <span className="inline-flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-[#5DCB7E] animate-pulse" />{counts.running || 0} Beroperasi</span>
+          <span className="inline-flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-[#E9730C]" />{counts.warning || 0} Perhatian</span>
+          <span className="inline-flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-[#59687A]" />{counts.idle || 0} Standby</span>
+          <span className="inline-flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-[#9C4F00]" />{counts.maintenance || 0} Maintenance</span>
         </div>
       </div>
 
