@@ -28,7 +28,24 @@ Design a modern web-based Manufacturing Execution System (MES) dashboard for an 
 - ✅ Persediaan with raw materials, finished goods, stock movements, consumption chart
 - ✅ Order Penjualan, Pengiriman, Pembelian, Pemeliharaan, Laporan
 - ✅ All UI in Bahasa Indonesia
+- ✅ Interactive dialogs (FormDialog, DetailDialog, NotificationsPopover, FilterPopover) — 100% tested
 - ✅ Testing: 100% pass, zero console errors
+
+## Visual Enhancement Pass (2026-02-09 — iteration 3, 100% test pass)
+Custom SVG-first industrial visual language. New components under `/app/frontend/src/components/visuals/`:
+- `ProductIcon.js` — 8 stylised product thumbnails (RC Pipe, NR Pipe, Jacking Pipe, U-Ditch, Cover U-Ditch, Box Culvert, Barrier, Sumur Resapan) + `getProductKey()` name matcher + category tone palette
+- `ProcessIcons.js` — Casting / Curing / Demoulding / QC custom industrial icons, 4 defect illustrations (Honeycomb, Retak Struktural, Cacat Permukaan, Tulangan Terekspos), and rotated `QualityStamp` (LULUS/REJECT)
+- `IndustrialVisuals.js` — `FactoryHero` blueprint+silhouette banner, `CementSilo` (live fill level), `AggregateStockpile` (cone w/ texture), `WarehouseFill` (isometric 3D box), `TruckIllustration` (status-aware), `CuringChamberIllustration` (steam vents + sensors), `MiniSparkline` (12-pt temp trend), `OEEGauge` (semi-circular radial), `ProductionLineIllustration` (conveyor+mixer+gantry)
+
+Page integrations:
+- Dashboard: FactoryHero, SVG thumbs in Top Products, colored circular icon badges in activity feed
+- Master Data: Grid/Table view toggle for Produk (visual catalog cards), category icons
+- Eksekusi Produksi: per-line conveyor illustration + custom stage icons + product thumbs in order rows
+- Curing Management: chamber illustrations, batch product thumbs, circular progress arcs, temp trend sparklines
+- Quality Control: Lulus/Reject rotated stamps, defect SVGs in reject rows, "Galeri Cacat Referensi" reference gallery
+- Inventory: "Penyimpanan Material Curah" with 3 silos + 3 stockpiles, 3D warehouse utilisation cards, FG row thumbnails
+- Pengiriman: "Status Armada" fleet snapshot with truck illustrations + 5-step delivery timeline (Disiapkan → Dimuat → Diverifikasi → Berangkat → Diterima), Linimasa column in DO table
+- Laporan: "Executive OEE Dashboard" with 4 radial gauges + benchmark band gradient (replaces line efficiency bar chart)
 
 ## Prioritized Backlog (P0/P1/P2)
 
