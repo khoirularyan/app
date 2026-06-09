@@ -13,6 +13,8 @@ import {
 } from "recharts";
 import { showExportToast, showPrintToast } from "@/components/shared/FilterPopover";
 
+import { OEEGauge } from "@/components/visuals/IndustrialVisuals";
+
 const COLORS = ["#0A6ED1", "#107E3E", "#E9730C", "#0070F2", "#B00020", "#59687A", "#9AA5B1", "#0854A1"];
 
 const ChartCard = ({ title, subtitle, children, testId }) => (
@@ -200,20 +202,51 @@ const Reports = () => {
           </TabsContent>
         </Tabs>
 
-        {/* Line efficiency */}
-        <ChartCard testId="report-line-efficiency" title="Efisiensi Line Produksi" subtitle="Utilisasi, output, dan OEE per line">
-          <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={efficiencyByLine} margin={{ left: -10 }}>
-              <CartesianGrid stroke="#EEF0F2" strokeDasharray="3 3" vertical={false} />
-              <XAxis dataKey="line" tick={{ fontSize: 11, fill: "#59687A" }} axisLine={{ stroke: "#DFE3E8" }} tickLine={false} />
-              <YAxis tick={{ fontSize: 11, fill: "#59687A" }} axisLine={false} tickLine={false} unit="%" />
-              <Tooltip />
-              <Legend wrapperStyle={{ fontSize: 11 }} />
-              <Bar dataKey="utilisasi" fill="#0A6ED1" radius={[2,2,0,0]} name="Utilisasi" />
-              <Bar dataKey="output" fill="#107E3E" radius={[2,2,0,0]} name="Output Quality" />
-              <Bar dataKey="oee" fill="#E9730C" radius={[2,2,0,0]} name="OEE" />
-            </BarChart>
-          </ResponsiveContainer>
+        {/* Executive OEE Gauges */}
+        <ChartCard testId="report-line-efficiency" title="Executive OEE Dashboard" subtitle="Overall Equipment Effectiveness — Availability × Performance × Quality">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+            {efficiencyByLine.map((l, i) => (
+              <div key={l.line} data-testid={`oee-gauge-${i}`} className="flex flex-col items-center bg-gradient-to-br from-[#F8FAFC] to-white border border-[#DFE3E8] rounded-md p-4">
+                <OEEGauge value={l.oee} label={l.line} subLabel="OEE %" size={150} />
+                <div className="w-full grid grid-cols-2 gap-2 mt-3 pt-3 border-t border-[#EEF0F2]">
+                  <div className="text-center">
+                    <div className="text-[9px] uppercase tracking-wider text-[#59687A] font-semibold">Utilisasi</div>
+                    <div className="font-mono-num text-sm font-semibold text-[#0A6ED1]">{l.utilisasi}%</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-[9px] uppercase tracking-wider text-[#59687A] font-semibold">Quality</div>
+                    <div className="font-mono-num text-sm font-semibold text-[#107E3E]">{l.output}%</div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+          {/* Benchmark band */}
+          <div className="border-t border-[#EEF0F2] pt-4">
+            <div className="flex items-center justify-between text-xs mb-2">
+              <span className="text-[#59687A] font-medium">Benchmark OEE Industri Manufaktur (World Class: ≥85%)</span>
+              <span className="font-mono-num text-[#1C252E] font-semibold">
+                Rata-rata: {(efficiencyByLine.reduce((s, l) => s + l.oee, 0) / efficiencyByLine.length).toFixed(1)}%
+              </span>
+            </div>
+            <div className="relative h-3 bg-gradient-to-r from-[#B00020] via-[#E9730C] to-[#107E3E] rounded-full overflow-hidden">
+              {efficiencyByLine.map((l) => (
+                <div
+                  key={l.line}
+                  className="absolute top-0 bottom-0 w-0.5 bg-white"
+                  style={{ left: `${l.oee}%`, boxShadow: "0 0 0 1px #1C252E" }}
+                  title={`${l.line}: ${l.oee}%`}
+                />
+              ))}
+            </div>
+            <div className="flex justify-between text-[10px] text-[#59687A] mt-1 font-mono-num">
+              <span>0% Poor</span>
+              <span>40% Low</span>
+              <span>60% Avg</span>
+              <span>85% World Class</span>
+              <span>100%</span>
+            </div>
+          </div>
         </ChartCard>
       </div>
     </div>

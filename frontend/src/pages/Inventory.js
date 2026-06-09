@@ -7,6 +7,33 @@ import { Progress } from "@/components/ui/progress";
 import { materials, finishedGoods, stockMovements, materialConsumption, warehouses, formatNumber, formatRupiah } from "@/data/mockData";
 import { Package, Boxes, ArrowDownToLine, ArrowUpFromLine } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
+import { CementSilo, AggregateStockpile, WarehouseFill } from "@/components/visuals/IndustrialVisuals";
+import ProductIcon from "@/components/visuals/ProductIcon";
+
+// Visual storage indicators (cement silos & aggregate stockpiles)
+const StorageStrip = () => (
+  <div className="bg-white border border-[#DFE3E8] rounded-md p-5" data-testid="storage-strip">
+    <div className="flex items-center justify-between mb-4">
+      <div>
+        <div className="text-base font-semibold text-[#1C252E] font-display">Penyimpanan Material Curah</div>
+        <div className="text-xs text-[#59687A]">Silo semen & stockpile agregat — pemantauan level real-time</div>
+      </div>
+      <div className="flex items-center gap-3 text-[10px] text-[#59687A]">
+        <span className="inline-flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-[#0A6ED1]" />Aman</span>
+        <span className="inline-flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-[#E9730C]" />Sedang</span>
+        <span className="inline-flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-[#B00020]" />Kritis</span>
+      </div>
+    </div>
+    <div className="grid grid-cols-2 md:grid-cols-6 gap-4 items-end">
+      <CementSilo label="Silo Semen 1" level={82} capacity="200 ton" />
+      <CementSilo label="Silo Semen 2" level={64} capacity="200 ton" />
+      <CementSilo label="Silo Semen 3" level={28} capacity="150 ton" />
+      <AggregateStockpile label="Pasir Lumajang" level={76} capacity="1.280 m³" color="#9C4F00" />
+      <AggregateStockpile label="Batu Split 1-2" level={58} capacity="980 m³" color="#5A5A5A" />
+      <AggregateStockpile label="Batu Split 2-3" level={44} capacity="720 m³" color="#6E6E6E" />
+    </div>
+  </div>
+);
 
 const Inventory = () => {
   const [tab, setTab] = useState("finished");
@@ -28,20 +55,17 @@ const Inventory = () => {
           <KPICard testId="inv-kpi-out" label="Pengeluaran Hari Ini" value="5" unit="transaksi" icon={ArrowUpFromLine} accent="neutral" />
         </div>
 
-        {/* Warehouse utilization */}
-        <div className="grid grid-cols-1 md:grid-cols-5 gap-3">
-          {warehouses.map((w, i) => (
-            <div key={w.kode} data-testid={`wh-${i}`} className="bg-white border border-[#DFE3E8] rounded-md p-3">
-              <div className="text-[10px] uppercase tracking-wider text-[#59687A] font-semibold">{w.kode}</div>
-              <div className="text-sm font-semibold text-[#1C252E] truncate">{w.nama}</div>
-              <div className="text-[11px] text-[#59687A] mb-2">{w.kapasitas}</div>
-              <div className="flex items-baseline justify-between mb-1">
-                <span className="text-xs text-[#59687A]">Utilisasi</span>
-                <span className="font-mono-num text-sm font-semibold text-[#1C252E]">{w.utilisasi}%</span>
-              </div>
-              <Progress value={w.utilisasi} className="h-1" />
-            </div>
-          ))}
+        {/* Storage visuals */}
+        <StorageStrip />
+
+        {/* Warehouse utilization 3D */}
+        <div>
+          <div className="text-base font-semibold text-[#1C252E] font-display mb-3">Utilisasi Gudang</div>
+          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-3">
+            {warehouses.map((w, i) => (
+              <WarehouseFill key={w.kode} code={w.kode} label={w.nama} level={w.utilisasi} capacity={w.kapasitas} />
+            ))}
+          </div>
         </div>
 
         <Tabs value={tab} onValueChange={setTab}>
@@ -70,7 +94,12 @@ const Inventory = () => {
                   {finishedGoods.map((f, i) => (
                     <tr key={f.kode} data-testid={`fg-row-${i}`}>
                       <td className="px-4 font-mono-num text-[#0A6ED1] font-medium">{f.kode}</td>
-                      <td className="px-4 font-medium">{f.nama}</td>
+                      <td className="px-4">
+                        <div className="flex items-center gap-2">
+                          <ProductIcon name={f.nama} size="sm" />
+                          <span className="font-medium">{f.nama}</span>
+                        </div>
+                      </td>
                       <td className="px-4 text-right font-mono-num font-semibold">{formatNumber(f.stok)}</td>
                       <td className="px-4 text-right font-mono-num text-[#E9730C]">{formatNumber(f.reserved)}</td>
                       <td className="px-4 text-right font-mono-num text-[#107E3E] font-semibold">{formatNumber(f.available)}</td>

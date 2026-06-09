@@ -8,6 +8,8 @@ import { qcInspections, strengthTests, rejects, rejectByReason } from "@/data/mo
 import { ShieldCheck, AlertTriangle, Activity, FlaskConical, Plus } from "lucide-react";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, BarChart, Bar, XAxis, YAxis, CartesianGrid } from "recharts";
 import FormDialog from "@/components/shared/FormDialog";
+import { DefectIcon, QualityStamp, defectList, reasonToDefectKey } from "@/components/visuals/ProcessIcons";
+import ProductIcon from "@/components/visuals/ProductIcon";
 
 const COLORS = ["#0A6ED1", "#E9730C", "#107E3E", "#0070F2", "#B00020", "#59687A"];
 
@@ -99,12 +101,23 @@ const QualityControl = () => {
                     <tr key={q.no} data-testid={`qc-row-${i}`}>
                       <td className="px-4 font-mono-num text-[#0A6ED1] font-medium">{q.no}</td>
                       <td className="px-4 font-mono-num">{q.po}</td>
-                      <td className="px-4 font-medium">{q.produk}</td>
+                      <td className="px-4">
+                        <div className="flex items-center gap-2">
+                          <ProductIcon name={q.produk} size="sm" />
+                          <span className="font-medium">{q.produk}</span>
+                        </div>
+                      </td>
                       <td className="px-4 text-right font-mono-num">{q.qty}</td>
                       <td className="px-4 text-right font-mono-num text-[#107E3E]">{q.dimensiOK}</td>
                       <td className="px-4 text-right font-mono-num text-[#B00020]">{q.dimensiReject}</td>
                       <td className="px-4 text-right font-mono-num font-semibold">{q.kuatTekan}</td>
-                      <td className="px-4"><StatusBadge status={q.status} /></td>
+                      <td className="px-4">
+                        <div className="flex items-center gap-2">
+                          <StatusBadge status={q.status} />
+                          {(q.status === "Lulus" || q.status === "Lulus Bersyarat") && <QualityStamp type="pass" />}
+                          {q.status === "Reject" && <QualityStamp type="reject" />}
+                        </div>
+                      </td>
                       <td className="px-4 text-[#59687A]">{q.inspektur}</td>
                       <td className="px-4 font-mono-num text-[#59687A]">{q.tanggal}</td>
                     </tr>
@@ -153,24 +166,35 @@ const QualityControl = () => {
                 <thead>
                   <tr>
                     <th className="px-4 py-2 text-left">No. Reject</th>
+                    <th className="px-4 py-2 text-left">Visual</th>
                     <th className="px-4 py-2 text-left">Produk</th>
                     <th className="px-4 py-2 text-right">Qty</th>
                     <th className="px-4 py-2 text-left">Alasan</th>
                     <th className="px-4 py-2 text-left">PO Asal</th>
                     <th className="px-4 py-2 text-left">Tanggal</th>
                     <th className="px-4 py-2 text-left">Disposisi</th>
+                    <th className="px-4 py-2 text-left">Status</th>
                   </tr>
                 </thead>
                 <tbody>
                   {rejects.map((r, i) => (
                     <tr key={r.no} data-testid={`reject-row-${i}`}>
                       <td className="px-4 font-mono-num text-[#B00020] font-medium">{r.no}</td>
-                      <td className="px-4 font-medium">{r.produk}</td>
+                      <td className="px-4">
+                        <DefectIcon type={reasonToDefectKey(r.alasan)} className="w-12 h-9" />
+                      </td>
+                      <td className="px-4">
+                        <div className="flex items-center gap-2">
+                          <ProductIcon name={r.produk} size="sm" />
+                          <span className="font-medium">{r.produk}</span>
+                        </div>
+                      </td>
                       <td className="px-4 text-right font-mono-num">{r.qty}</td>
                       <td className="px-4">{r.alasan}</td>
                       <td className="px-4 font-mono-num text-[#59687A]">{r.po}</td>
                       <td className="px-4 font-mono-num text-[#59687A]">{r.tanggal}</td>
                       <td className="px-4"><StatusBadge status={r.disposisi} variant="warning" /></td>
+                      <td className="px-4"><QualityStamp type="reject" /></td>
                     </tr>
                   ))}
                 </tbody>
@@ -179,6 +203,29 @@ const QualityControl = () => {
           </TabsContent>
 
           <TabsContent value="analysis" className="mt-4">
+            {/* Defect Reference Gallery */}
+            <div className="bg-white border border-[#DFE3E8] rounded-md p-4 mb-4">
+              <div className="flex items-center justify-between mb-3">
+                <div>
+                  <div className="text-base font-semibold text-[#1C252E] font-display">Galeri Cacat Referensi</div>
+                  <div className="text-xs text-[#59687A]">Standar visual untuk identifikasi defect mengacu SNI 7833:2012</div>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                {defectList.map((d) => (
+                  <div key={d.key} data-testid={`defect-card-${d.key}`} className="border border-[#DFE3E8] rounded-md overflow-hidden">
+                    <DefectIcon type={d.key} className="w-full !h-24 !rounded-none !border-0 border-b" />
+                    <div className="p-3">
+                      <div className="flex items-start justify-between gap-2 mb-1">
+                        <div className="text-sm font-semibold text-[#1C252E]">{d.label}</div>
+                        <QualityStamp type="reject" className="!text-[9px] !py-0 !px-1.5" />
+                      </div>
+                      <div className="text-[11px] text-[#59687A]">{d.description}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
               <div className="bg-white border border-[#DFE3E8] rounded-md p-4">
                 <div className="text-base font-semibold text-[#1C252E] font-display mb-4">Distribusi Penyebab Reject</div>

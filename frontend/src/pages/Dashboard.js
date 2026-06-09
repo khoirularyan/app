@@ -15,7 +15,19 @@ import {
   Legend, ResponsiveContainer, Area, AreaChart
 } from "recharts";
 import { showExportToast, showRefreshToast } from "@/components/shared/FilterPopover";
-import { toast } from "sonner";const Dashboard = () => {
+import { toast } from "sonner";
+import { FactoryHero } from "@/components/visuals/IndustrialVisuals";
+import ProductIcon from "@/components/visuals/ProductIcon";
+import { company } from "@/data/mockData";
+
+const activityIconMap = {
+  success: { bg: "#E6F5EC", color: "#107E3E", icon: ShieldCheck },
+  error: { bg: "#FBE6E9", color: "#B00020", icon: AlertTriangle },
+  warning: { bg: "#FDF3E7", color: "#E9730C", icon: Activity },
+  info: { bg: "#E5F0FA", color: "#0A6ED1", icon: Hammer },
+};
+
+const Dashboard = () => {
   return (
     <div>
       <PageHeader
@@ -36,6 +48,9 @@ import { toast } from "sonner";const Dashboard = () => {
       />
 
       <div className="p-6 space-y-6">
+        {/* Hero Banner */}
+        <FactoryHero company={company.name} plant={company.plant} shift={company.shift} />
+
         {/* KPI Grid */}
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
           <KPICard testId="kpi-target" label="Target Produksi" value={todayKPIs.targetProduksi} unit="unit" icon={Target} accent="neutral" />
@@ -118,18 +133,21 @@ import { toast } from "sonner";const Dashboard = () => {
             </div>
             <div className="space-y-3">
               {topProducts.map((p, i) => (
-                <div key={p.kode} data-testid={`top-product-${i}`}>
-                  <div className="flex items-center justify-between mb-1">
-                    <div className="min-w-0 flex-1">
-                      <div className="text-xs font-medium text-[#1C252E] truncate">{p.nama}</div>
-                      <div className="text-[10px] text-[#59687A]">{p.kode}</div>
+                <div key={p.kode} data-testid={`top-product-${i}`} className="flex items-center gap-3">
+                  <ProductIcon name={p.nama} size="sm" />
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between mb-1">
+                      <div className="min-w-0 flex-1">
+                        <div className="text-xs font-medium text-[#1C252E] truncate">{p.nama}</div>
+                        <div className="text-[10px] text-[#59687A] font-mono-num">{p.kode}</div>
+                      </div>
+                      <div className="text-right ml-2">
+                        <div className="text-sm font-semibold text-[#1C252E] font-mono-num">{formatNumber(p.qty)}</div>
+                        <div className="text-[10px] text-[#59687A]">{p.persen}%</div>
+                      </div>
                     </div>
-                    <div className="text-right ml-2">
-                      <div className="text-sm font-semibold text-[#1C252E] font-mono-num">{formatNumber(p.qty)}</div>
-                      <div className="text-[10px] text-[#59687A]">{p.persen}%</div>
-                    </div>
+                    <Progress value={p.persen * 4} className="h-1" />
                   </div>
-                  <Progress value={p.persen * 4} className="h-1" />
                 </div>
               ))}
             </div>
@@ -144,18 +162,23 @@ import { toast } from "sonner";const Dashboard = () => {
               <Button variant="link" size="sm" className="text-xs text-[#0A6ED1] h-auto p-0" onClick={() => toast.info("Membuka log aktivitas lengkap...")}>Log lengkap →</Button>
             </div>
             <div className="space-y-0 -mx-4">
-              {recentActivities.map((a, i) => (
-                <div key={i} data-testid={`activity-${i}`} className="flex items-start gap-3 px-4 py-2.5 hover:bg-[#F8FAFC] border-l-2 transition-colors" style={{
-                  borderLeftColor: a.status === "success" ? "#107E3E" : a.status === "error" ? "#B00020" : a.status === "warning" ? "#E9730C" : "#0A6ED1"
-                }}>
-                  <div className="font-mono-num text-[11px] text-[#59687A] w-12 flex-shrink-0 mt-0.5">{a.waktu}</div>
-                  <div className="flex-1 min-w-0">
-                    <div className="text-[13px] font-medium text-[#1C252E]">{a.aktivitas}</div>
-                    <div className="text-xs text-[#59687A] truncate">{a.detail}</div>
+              {recentActivities.map((a, i) => {
+                const cfg = activityIconMap[a.status] || activityIconMap.info;
+                const IconC = cfg.icon;
+                return (
+                  <div key={i} data-testid={`activity-${i}`} className="flex items-start gap-3 px-4 py-2.5 hover:bg-[#F8FAFC] border-l-2 transition-colors" style={{ borderLeftColor: cfg.color }}>
+                    <div className="font-mono-num text-[11px] text-[#59687A] w-12 flex-shrink-0 mt-1">{a.waktu}</div>
+                    <div className="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5" style={{ backgroundColor: cfg.bg, color: cfg.color }}>
+                      <IconC className="w-3.5 h-3.5" strokeWidth={2} />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="text-[13px] font-medium text-[#1C252E]">{a.aktivitas}</div>
+                      <div className="text-xs text-[#59687A] truncate">{a.detail}</div>
+                    </div>
+                    <StatusBadge status={a.line} variant="info" />
                   </div>
-                  <StatusBadge status={a.line} variant="info" />
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         </div>

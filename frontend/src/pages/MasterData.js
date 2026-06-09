@@ -4,17 +4,19 @@ import StatusBadge from "@/components/shared/StatusBadge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Plus, Search, Download } from "lucide-react";
+import { Plus, Search, Download, LayoutGrid, Table as TableIcon, Eye } from "lucide-react";
 import FormDialog from "@/components/shared/FormDialog";
+import DetailDialog from "@/components/shared/DetailDialog";
 import FilterPopover, { showExportToast } from "@/components/shared/FilterPopover";
 import { toast } from "sonner";
+import ProductIcon, { getProductKey } from "@/components/visuals/ProductIcon";
 import {
   products, productCategories, concreteGrades, materials, molds,
   customers, suppliers, warehouses, productionLines, machines, employees, shifts,
   formatRupiah, formatNumber
 } from "@/data/mockData";
 
-const Section = ({ children, columns, data, testId, entityName, addFields, filterSelects }) => {
+const Section = ({ children, columns, data, testId, entityName, addFields, filterSelects, headerExtra }) => {
   const [query, setQuery] = useState("");
   const filtered = data.filter((row) => {
     if (!query) return true;
@@ -23,15 +25,18 @@ const Section = ({ children, columns, data, testId, entityName, addFields, filte
   return (
     <div className="bg-white border border-[#DFE3E8] rounded-md overflow-hidden" data-testid={testId}>
       <div className="flex items-center justify-between px-4 py-3 border-b border-[#DFE3E8]">
-        <div className="relative w-64">
-          <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-[#59687A]" />
-          <Input
-            placeholder="Cari..."
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            className="pl-9 h-8 text-xs bg-[#F4F6F8] border-[#DFE3E8]"
-            data-testid={`${testId}-search`}
-          />
+        <div className="flex items-center gap-2">
+          <div className="relative w-64">
+            <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-[#59687A]" />
+            <Input
+              placeholder="Cari..."
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              className="pl-9 h-8 text-xs bg-[#F4F6F8] border-[#DFE3E8]"
+              data-testid={`${testId}-search`}
+            />
+          </div>
+          {headerExtra}
         </div>
         <div className="flex gap-2">
           <FilterPopover testId={`${testId}-filter`} selects={filterSelects || []} />
@@ -78,8 +83,84 @@ const Section = ({ children, columns, data, testId, entityName, addFields, filte
   );
 };
 
+// Products grid card (visual catalog view)
+const ProductGridCard = ({ p, i }) => (
+  <DetailDialog
+    testId={`product-detail-${i}`}
+    title={p.nama}
+    subtitle={`${p.kode} • ${p.spek}`}
+    status={p.grade}
+    sections={[
+      { title: "Informasi Produk", items: [
+        { label: "Kode Produk", value: p.kode },
+        { label: "Nama Produk", value: p.nama },
+        { label: "Kategori", value: p.kategori },
+        { label: "Varian", value: p.varian },
+        { label: "Spesifikasi", value: p.spek },
+        { label: "Mutu Beton", value: p.grade, render: (v) => <StatusBadge status={v} variant="info" /> },
+      ]},
+      { title: "Spesifikasi Teknis", items: [
+        { label: "Berat per Unit", value: `${formatNumber(p.berat)} kg` },
+        { label: "Harga Satuan", value: formatRupiah(p.harga) },
+        { label: "Standar", value: "SNI 7833:2012" },
+        { label: "Toleransi", value: "± 5 mm" },
+      ]},
+    ]}
+    trigger={
+      <div
+        data-testid={`product-card-${i}`}
+        className="bg-white border border-[#DFE3E8] rounded-md overflow-hidden hover:border-[#0A6ED1] hover:shadow-sm transition-all cursor-pointer group"
+      >
+        <div className="aspect-[16/10] bg-gradient-to-br from-[#F8FAFC] to-[#EEF0F2] p-4 flex items-center justify-center relative">
+          <div className="w-full max-w-[160px]">
+            <ProductIcon name={p.nama} size="lg" className="w-full !h-24" />
+          </div>
+          <div className="absolute top-2 right-2">
+            <StatusBadge status={p.grade} variant="info" />
+          </div>
+          <div className="absolute bottom-2 left-2 text-[10px] uppercase tracking-wider text-[#59687A] font-semibold">{p.kategori}</div>
+        </div>
+        <div className="p-3 border-t border-[#DFE3E8]">
+          <div className="text-[10px] font-mono-num text-[#0A6ED1] font-medium">{p.kode}</div>
+          <div className="text-sm font-semibold text-[#1C252E] truncate group-hover:text-[#0A6ED1] transition-colors">{p.nama}</div>
+          <div className="text-[11px] text-[#59687A] mb-2">{p.spek}</div>
+          <div className="flex items-center justify-between pt-1 border-t border-[#EEF0F2]">
+            <div className="text-[10px] text-[#59687A]">Harga</div>
+            <div className="font-mono-num text-xs font-semibold text-[#1C252E]">{formatRupiah(p.harga)}</div>
+          </div>
+        </div>
+      </div>
+    }
+  />
+);
+
 const MasterData = () => {
   const [tab, setTab] = useState("products");
+  const [productView, setProductView] = useState("grid"); // "grid" | "table"
+  const [productQuery, setProductQuery] = useState("");
+  const filteredProducts = products.filter((p) => {
+    if (!productQuery) return true;
+    return Object.values(p).some((v) => String(v).toLowerCase().includes(productQuery.toLowerCase()));
+  });
+
+  const viewToggle = (
+    <div className="inline-flex items-center border border-[#DFE3E8] rounded-md p-0.5 bg-[#F4F6F8]">
+      <button
+        data-testid="product-view-grid"
+        onClick={() => setProductView("grid")}
+        className={`h-7 px-2.5 text-xs rounded flex items-center gap-1.5 transition-colors ${productView === "grid" ? "bg-white text-[#0A6ED1] shadow-sm font-medium" : "text-[#59687A]"}`}
+      >
+        <LayoutGrid className="w-3.5 h-3.5" /> Grid
+      </button>
+      <button
+        data-testid="product-view-table"
+        onClick={() => setProductView("table")}
+        className={`h-7 px-2.5 text-xs rounded flex items-center gap-1.5 transition-colors ${productView === "table" ? "bg-white text-[#0A6ED1] shadow-sm font-medium" : "text-[#59687A]"}`}
+      >
+        <TableIcon className="w-3.5 h-3.5" /> Tabel
+      </button>
+    </div>
+  );
 
   return (
     <div>
@@ -107,28 +188,82 @@ const MasterData = () => {
           </TabsList>
 
           <TabsContent value="products" className="mt-4">
-            <Section testId="products-table" entityName="Produk" data={products}
-              addFields={[
-                { name: "kode", label: "Kode Produk", required: true },
-                { name: "nama", label: "Nama Produk", required: true, span: 2 },
-                { name: "kategori", label: "Kategori", type: "select", options: productCategories.map(c => ({ value: c.nama, label: c.nama })) },
-                { name: "grade", label: "Mutu Beton", type: "select", options: concreteGrades.map(g => ({ value: g.grade, label: g.grade })) },
-                { name: "spek", label: "Spesifikasi" },
-                { name: "berat", label: "Berat (kg)", type: "number" },
-                { name: "harga", label: "Harga (Rp)", type: "number" },
-              ]}
-              filterSelects={[
-                { name: "kategori", label: "Kategori", options: productCategories.map(c => ({ value: c.nama, label: c.nama })) },
-              ]}
-              columns={[
-              { key: "kode", label: "Kode", cls: "font-mono-num text-[#0A6ED1] font-medium" },
-              { key: "nama", label: "Nama Produk", cls: "font-medium" },
-              { key: "kategori", label: "Kategori" },
-              { key: "spek", label: "Spesifikasi", cls: "text-[#59687A]" },
-              { key: "grade", label: "Mutu", render: (r) => <StatusBadge status={r.grade} variant="info" /> },
-              { key: "berat", label: "Berat (kg)", cls: "text-right font-mono-num", render: (r) => formatNumber(r.berat) },
-              { key: "harga", label: "Harga", cls: "text-right font-mono-num", render: (r) => formatRupiah(r.harga) },
-            ]} />
+            {productView === "grid" ? (
+              <div className="bg-white border border-[#DFE3E8] rounded-md" data-testid="products-grid">
+                <div className="flex items-center justify-between px-4 py-3 border-b border-[#DFE3E8]">
+                  <div className="flex items-center gap-2">
+                    <div className="relative w-64">
+                      <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-[#59687A]" />
+                      <Input
+                        placeholder="Cari produk..."
+                        value={productQuery}
+                        onChange={(e) => setProductQuery(e.target.value)}
+                        className="pl-9 h-8 text-xs bg-[#F4F6F8] border-[#DFE3E8]"
+                        data-testid="products-grid-search"
+                      />
+                    </div>
+                    {viewToggle}
+                  </div>
+                  <div className="flex gap-2">
+                    <Button variant="outline" size="sm" className="h-8 text-xs gap-1.5" onClick={() => showExportToast("Katalog Produk")}>
+                      <Download className="w-3.5 h-3.5" />Ekspor Katalog
+                    </Button>
+                    <FormDialog
+                      testId="products-grid-create"
+                      title="Tambah Produk"
+                      description="Tambahkan produk baru ke katalog"
+                      submitLabel="Simpan"
+                      successMessage="Produk berhasil ditambahkan"
+                      fields={[
+                        { name: "kode", label: "Kode Produk", required: true },
+                        { name: "nama", label: "Nama Produk", required: true, span: 2 },
+                        { name: "kategori", label: "Kategori", type: "select", options: productCategories.map(c => ({ value: c.nama, label: c.nama })) },
+                        { name: "grade", label: "Mutu Beton", type: "select", options: concreteGrades.map(g => ({ value: g.grade, label: g.grade })) },
+                        { name: "spek", label: "Spesifikasi" },
+                        { name: "berat", label: "Berat (kg)", type: "number" },
+                        { name: "harga", label: "Harga (Rp)", type: "number" },
+                      ]}
+                      trigger={
+                        <Button size="sm" className="h-8 text-xs gap-1.5 bg-[#0A6ED1] hover:bg-[#0854A1]">
+                          <Plus className="w-3.5 h-3.5" />Tambah Produk
+                        </Button>
+                      }
+                    />
+                  </div>
+                </div>
+                {filteredProducts.length === 0 ? (
+                  <div className="px-4 py-12 text-center text-xs text-[#59687A]">Tidak ada produk yang cocok</div>
+                ) : (
+                  <div className="p-4 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
+                    {filteredProducts.map((p, i) => <ProductGridCard key={p.kode} p={p} i={i} />)}
+                  </div>
+                )}
+              </div>
+            ) : (
+              <Section testId="products-table" entityName="Produk" data={products} headerExtra={viewToggle}
+                addFields={[
+                  { name: "kode", label: "Kode Produk", required: true },
+                  { name: "nama", label: "Nama Produk", required: true, span: 2 },
+                  { name: "kategori", label: "Kategori", type: "select", options: productCategories.map(c => ({ value: c.nama, label: c.nama })) },
+                  { name: "grade", label: "Mutu Beton", type: "select", options: concreteGrades.map(g => ({ value: g.grade, label: g.grade })) },
+                  { name: "spek", label: "Spesifikasi" },
+                  { name: "berat", label: "Berat (kg)", type: "number" },
+                  { name: "harga", label: "Harga (Rp)", type: "number" },
+                ]}
+                filterSelects={[
+                  { name: "kategori", label: "Kategori", options: productCategories.map(c => ({ value: c.nama, label: c.nama })) },
+                ]}
+                columns={[
+                { key: "thumb", label: "", render: (r) => <ProductIcon name={r.nama} size="sm" /> },
+                { key: "kode", label: "Kode", cls: "font-mono-num text-[#0A6ED1] font-medium" },
+                { key: "nama", label: "Nama Produk", cls: "font-medium" },
+                { key: "kategori", label: "Kategori" },
+                { key: "spek", label: "Spesifikasi", cls: "text-[#59687A]" },
+                { key: "grade", label: "Mutu", render: (r) => <StatusBadge status={r.grade} variant="info" /> },
+                { key: "berat", label: "Berat (kg)", cls: "text-right font-mono-num", render: (r) => formatNumber(r.berat) },
+                { key: "harga", label: "Harga", cls: "text-right font-mono-num", render: (r) => formatRupiah(r.harga) },
+              ]} />
+            )}
           </TabsContent>
 
           <TabsContent value="categories" className="mt-4">
@@ -139,6 +274,7 @@ const MasterData = () => {
                 { name: "deskripsi", label: "Deskripsi", type: "textarea", span: 2 },
               ]}
               columns={[
+              { key: "thumb", label: "", render: (r) => <ProductIcon name={r.nama} size="sm" /> },
               { key: "kode", label: "Kode", cls: "font-mono-num text-[#0A6ED1] font-medium" },
               { key: "nama", label: "Kategori", cls: "font-medium" },
               { key: "deskripsi", label: "Deskripsi", cls: "text-[#59687A]" },
