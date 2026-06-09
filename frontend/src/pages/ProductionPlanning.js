@@ -4,21 +4,55 @@ import KPICard from "@/components/shared/KPICard";
 import FormDialog from "@/components/shared/FormDialog";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
 import { planningRows, productionOrders, productionLines, curingBatches } from "@/data/mockData";
 import { Calendar } from "@/components/ui/calendar";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
-import { ChevronLeft, ChevronRight, Plus, Download, CalendarRange, Factory } from "lucide-react";
+import { ChevronLeft, ChevronRight, Plus, Download, CalendarRange, Factory, FileText, Package, Clock, AlertTriangle, TrendingUp } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
+// Mock data for Sales Orders
+const salesOrders = [
+  { no: "SO-2026-001", customer: "PT Konstruksi Prima", produk: "PC Girder G40", qty: 120, deliveryDate: "2026-07-15", type: "MTO", status: "Approved" },
+  { no: "SO-2026-002", customer: "PT Infrastruktur Jaya", produk: "Precast Pile D600", qty: 450, deliveryDate: "2026-07-20", type: "MTO", status: "Approved" },
+  { no: "SO-2026-003", customer: "Stock Inventory", produk: "Box Culvert 2000", qty: 80, deliveryDate: "2026-07-30", type: "MTS", status: "Planned" },
+  { no: "SO-2026-004", customer: "PT Pembangunan Mega", produk: "U-Ditch 400×400", qty: 1200, deliveryDate: "2026-08-05", type: "MTO", status: "Approved" },
+];
+
+// Mock data for Material Requirements
+const materialRequirements = [
+  { material: "Cement Type V", required: 24500, available: 22000, unit: "KG", status: "LOW" },
+  { material: "Steel Rebar Ø22mm", required: 13800, available: 15200, unit: "TONS", status: "OK" },
+  { material: "Crushed Stone", required: 180, available: 95, unit: "M³", status: "LOW" },
+  { material: "Admixture Poly-88", required: 680, available: 720, unit: "Liters", status: "OK" },
+];
+
+// Mock data for Inventory Aging (MTS products)
+const inventoryAging = [
+  { produk: "Box Culvert 2000", qty: 45, age: 28, location: "Warehouse A", status: "WARNING" },
+  { produk: "U-Ditch 400×400", qty: 120, age: 15, location: "Warehouse B", status: "OK" },
+  { produk: "Precast Pile D600", qty: 30, age: 35, location: "Warehouse A", status: "CRITICAL" },
+];
+
 const ProductionPlanning = () => {
   const [calendarMonth, setCalendarMonth] = useState(new Date(2026, 5, 9));
+  const [selectedTab, setSelectedTab] = useState("schedule");
+  const [showMRPDialog, setShowMRPDialog] = useState(false);
+  const [showScheduleDialog, setShowScheduleDialog] = useState(false);
 
   // quick KPI calculations
   const totalPlanned = productionOrders.reduce((s, o) => s + (o.qty || 0), 0);
   const totalActive = productionOrders.filter((o) => o.status !== "Selesai").length;
   const plannedThisWeek = planningRows.length;
   const utilization = 93.4; // placeholder
+  const pendingSO = salesOrders.filter(so => so.status === "Approved").length;
+  const materialShortage = materialRequirements.filter(m => m.status === "LOW").length;
+  const criticalAging = inventoryAging.filter(i => i.status === "CRITICAL").length;
 
   // compute resource capacity data aggregated by batch
   const batches = Array.from(new Set((planningRows || []).map((r) => r.batch))).filter(Boolean);
@@ -30,20 +64,31 @@ const ProductionPlanning = () => {
     return { batch: b, planned, actual: Math.round(actual) };
   });
 
+  const handleCreateSchedule = () => {
+    setShowScheduleDialog(true);
+  };
+
+  const handleGenerateMRP = () => {
+    setShowMRPDialog(true);
+  };
+
   return (
     <div>
       <PageHeader
         title="Production Planning"
-        subtitle="Strategic optimization and scheduling for operations"
+        subtitle="Perencanaan Produksi dari Sales Order (MTO/MTS) hingga Master Production Schedule"
         breadcrumbs={["Beranda", "Perencanaan Produksi"]}
         testId="planning-page-header"
         actions={
           <div className="flex items-center gap-2">
+            <Button variant="outline" size="sm" onClick={handleGenerateMRP}>
+              <FileText className="w-3.5 h-3.5" />Generate MRP
+            </Button>
             <Button variant="outline" size="sm">
               <Download className="w-3.5 h-3.5" />Export Report
             </Button>
-            <Button size="sm" className="bg-[#0A6ED1] hover:bg-[#0854A1]">
-              <Plus className="w-3.5 h-3.5" /> New Schedule
+            <Button size="sm" className="bg-[#0A6ED1] hover:bg-[#0854A1]" onClick={handleCreateSchedule}>
+              <Plus className="w-3.5 h-3.5" /> Create Schedule
             </Button>
           </div>
         }

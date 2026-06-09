@@ -11,6 +11,7 @@ import DeliveryOrders from "@/pages/DeliveryOrders";
 import Purchasing from "@/pages/Purchasing";
 import Maintenance from "@/pages/Maintenance";
 import ProductionExecution from "@/pages/ProductionExecution";
+import ProductionWorkOrder from "@/pages/ProductionWorkOrder";
 import CuringManagement from "@/pages/CuringManagement";
 import QualityControl from "@/pages/QualityControl";
 import Inventory from "@/pages/Inventory";
@@ -32,6 +33,7 @@ function App() {
             <Route path="/master-process" element={<MasterProcess />} />
             <Route path="/planning" element={<ProductionPlanning />} />
             <Route path="/production-orders" element={<ProductionOrders />} />
+            <Route path="/work-orders" element={<ProductionWorkOrder />} />
             <Route path="/sales" element={<SalesOrders />} />
             <Route path="/delivery" element={<DeliveryOrders />} />
             <Route path="/purchasing" element={<Purchasing />} />

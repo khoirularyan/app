@@ -396,6 +396,8 @@ export const navigationItems = [
   { id: "master-bom", label: "Master BOM", icon: "Package", path: "/master-bom" },
   { id: "sales", label: "Sales", icon: "ShoppingBag", path: "/sales" },
   { id: "planning", label: "Perencanaan Produksi", icon: "CalendarRange", path: "/planning" },
+  { id: "production-orders", label: "Production Orders", icon: "ClipboardList", path: "/production-orders" },
+  { id: "work-orders", label: "Work Orders", icon: "Factory", path: "/work-orders" },
   { id: "execution", label: "Eksekusi Produksi", icon: "PlayCircle", path: "/production-execution" },
   { id: "quality", label: "Quality Control", icon: "ShieldCheck", path: "/quality" },
   { id: "inventory", label: "Persediaan", icon: "Package", path: "/inventory" },
